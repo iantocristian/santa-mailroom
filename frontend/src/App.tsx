@@ -7,6 +7,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Children from './pages/Children';
+import Settings from './pages/Settings';
+import Wishlist from './pages/Wishlist';
+import Letters from './pages/Letters';
 import Sidebar from './components/Sidebar';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -120,7 +123,7 @@ function App() {
         element={
           <ProtectedRoute>
             <AppLayout>
-              <PlaceholderPage title="Wishlist" icon="🎁" />
+              <Wishlist />
             </AppLayout>
           </ProtectedRoute>
         }
@@ -130,7 +133,7 @@ function App() {
         element={
           <ProtectedRoute>
             <AppLayout>
-              <PlaceholderPage title="Letters" icon="✉️" />
+              <Letters />
             </AppLayout>
           </ProtectedRoute>
         }
@@ -170,7 +173,7 @@ function App() {
         element={
           <ProtectedRoute>
             <AppLayout>
-              <PlaceholderPage title="Settings" icon="⚙️" />
+              <Settings />
             </AppLayout>
           </ProtectedRoute>
         }

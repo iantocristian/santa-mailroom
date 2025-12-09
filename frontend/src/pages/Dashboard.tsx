@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useFamilyStore } from '../store/familyStore';
 import { useChildrenStore } from '../store/childrenStore';
 import { useNotificationsStore } from '../store/notificationsStore';
@@ -66,7 +67,7 @@ export default function Dashboard() {
                         <h2 className="card-title">
                             <span>👧</span> Your Children
                         </h2>
-                        <button className="btn btn-sm btn-primary">+ Add Child</button>
+                        <Link to="/children" className="btn btn-sm btn-primary">+ Add Child</Link>
                     </div>
                     <div className="card-body">
                         {children.length === 0 ? (
@@ -74,7 +75,7 @@ export default function Dashboard() {
                                 <div className="empty-state-icon">🧒</div>
                                 <h3>No children registered yet</h3>
                                 <p>Add your first child to get started with Santa's mailroom!</p>
-                                <button className="btn btn-primary">Add Your First Child</button>
+                                <Link to="/children" className="btn btn-primary">Add Your First Child</Link>
                             </div>
                         ) : (
                             <div className="children-grid">
@@ -179,9 +180,9 @@ export default function Dashboard() {
                             Some letters have been flagged for concerning content.
                         </p>
                     </div>
-                    <button className="btn btn-sm btn-secondary" style={{ marginLeft: 'auto' }}>
+                    <Link to="/moderation" className="btn btn-sm btn-secondary" style={{ marginLeft: 'auto' }}>
                         Review Now
-                    </button>
+                    </Link>
                 </div>
             )}
 

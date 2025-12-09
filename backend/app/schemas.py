@@ -80,14 +80,14 @@ class FamilyStats(BaseModel):
 class ChildCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     email: EmailStr  # Will be hashed before storage
-    country: Optional[str] = Field(None, min_length=2, max_length=2)
+    country: Optional[str] = Field(None, max_length=100)
     birth_year: Optional[int] = Field(None, ge=1900, le=2100)
     avatar_url: Optional[str] = None
 
 
 class ChildUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=100)
-    country: Optional[str] = Field(None, min_length=2, max_length=2)
+    country: Optional[str] = Field(None, max_length=100)
     birth_year: Optional[int] = Field(None, ge=1900, le=2100)
     avatar_url: Optional[str] = None
 

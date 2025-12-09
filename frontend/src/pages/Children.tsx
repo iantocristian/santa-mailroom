@@ -1,5 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useChildrenStore } from '../store/childrenStore';
+import { COUNTRIES } from '../constants/countries';
 import type { ChildCreate } from '../types';
 
 export default function ChildrenPage() {
@@ -28,8 +29,15 @@ export default function ChildrenPage() {
             setShowModal(false);
             setFormData({ name: '', email: '', country: '', birth_year: undefined });
         } catch (err: unknown) {
-            const error = err as { response?: { data?: { detail?: string } } };
-            setError(error.response?.data?.detail || 'Failed to add child');
+            const error = err as { response?: { data?: { detail?: string | Array<{ msg: string }> } } };
+            const detail = error.response?.data?.detail;
+            if (typeof detail === 'string') {
+                setError(detail);
+            } else if (Array.isArray(detail)) {
+                setError(detail.map(e => e.msg).join(', '));
+            } else {
+                setError('Failed to add child');
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -193,13 +201,16 @@ export default function ChildrenPage() {
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                                     <div className="form-group">
                                         <label className="form-label">Country</label>
-                                        <input
-                                            type="text"
+                                        <select
                                             className="form-input"
-                                            placeholder="e.g., USA"
                                             value={formData.country || ''}
-                                            onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                                        />
+                                            onChange={(e) => setFormData({ ...formData, country: e.target.value || undefined })}
+                                        >
+                                            <option value="">Select country...</option>
+                                            {COUNTRIES.map(c => (
+                                                <option key={c.code} value={c.code}>{c.name}</option>
+                                            ))}
+                                        </select>
                                     </div>
 
                                     <div className="form-group">

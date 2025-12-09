@@ -4,13 +4,11 @@ Uses OpenAI API for:
 - Extracting wish items from letters
 - Content moderation/classification
 - Generating personalized Santa replies
-- Product search via web search tool
 """
 import json
 import logging
 from typing import List, Optional
 from dataclasses import dataclass, field
-from datetime import datetime
 
 from openai import OpenAI
 
@@ -34,16 +32,6 @@ class ModerationResult:
     is_concerning: bool
     flags: List[dict] = field(default_factory=list)  # [{type, severity, excerpt, confidence, explanation}]
 
-
-@dataclass
-class ProductSearchResult:
-    """Result of product search."""
-    name: str
-    estimated_price: Optional[float] = None
-    currency: str = "USD"
-    product_url: Optional[str] = None
-    image_url: Optional[str] = None
-    description: Optional[str] = None
 
 
 class GPTService:
@@ -213,68 +201,6 @@ Analyze this letter for any concerning content."""
         except Exception as e:
             logger.error(f"Error classifying content: {e}")
             return ModerationResult(is_concerning=False, flags=[])
-    
-    def search_product(self, item_name: str, country: str = "US") -> Optional[ProductSearchResult]:
-        """
-        Search for a product online using GPT with web search.
-        
-        Args:
-            item_name: The product to search for
-            country: Country code for regional pricing
-            
-        Returns:
-            ProductSearchResult or None if not found
-        """
-        if not self.client:
-            return None
-        
-        system_prompt = """You are a helpful shopping assistant. Search for the product and provide:
-1. The exact product name as sold
-2. Approximate price in the local currency
-3. A URL to purchase (prefer major retailers)
-4. A brief description
-
-If multiple options exist, choose a popular, age-appropriate option.
-
-Respond with JSON:
-{
-  "name": "full product name",
-  "estimated_price": number or null,
-  "currency": "USD",
-  "product_url": "url or null",
-  "image_url": "image url or null",
-  "description": "brief description"
-}"""
-
-        user_prompt = f"Search for this gift item for a child: {item_name}\nCountry: {country}"
-
-        try:
-            # Use GPT with web search capability
-            response = self.client.chat.completions.create(
-                model="gpt-4o",  # Model with web search
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                tools=[{"type": "web_search_preview"}],
-                response_format={"type": "json_object"}
-            )
-            
-            content = response.choices[0].message.content
-            data = json.loads(content)
-            
-            return ProductSearchResult(
-                name=data.get("name", item_name),
-                estimated_price=data.get("estimated_price"),
-                currency=data.get("currency", "USD"),
-                product_url=data.get("product_url"),
-                image_url=data.get("image_url"),
-                description=data.get("description")
-            )
-            
-        except Exception as e:
-            logger.error(f"Error searching for product '{item_name}': {e}")
-            return None
     
     def generate_santa_reply(
         self,

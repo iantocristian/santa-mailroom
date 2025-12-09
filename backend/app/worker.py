@@ -20,6 +20,7 @@ from app.models import (
 )
 from app.services.email_service import get_email_service, EmailService
 from app.services.gpt_service import get_gpt_service
+from app.services.product_search_service import get_product_search_service
 from app.services.notification_service import get_notification_service
 from app.config import get_settings
 
@@ -126,11 +127,21 @@ def handle_fetch_emails(db: Session, payload: dict):
             continue
         
         # Look up child by email hash
-        sender_hash = EmailService.hash_email(email_msg.from_email)
+        sender_email = email_msg.from_email.lower().strip()
+        sender_hash = EmailService.hash_email(sender_email)
+        logger.info(f"Processing email from: {sender_email}")
+        logger.info(f"Computed hash: {sender_hash}")
+        
+        # Log all registered email hashes for debugging
+        all_children = db.query(Child).all()
+        for c in all_children:
+            logger.debug(f"Registered child '{c.name}' hash: {c.email_hash}")
+        
         child = db.query(Child).filter(Child.email_hash == sender_hash).first()
         
         if not child:
-            logger.info(f"Email from unregistered address, skipping")
+            logger.warning(f"Email from unregistered address: {sender_email} (hash: {sender_hash})")
+            logger.warning(f"Registered hashes: {[c.email_hash for c in all_children]}")
             continue
         
         # Determine Christmas year
@@ -227,12 +238,13 @@ def handle_process_letter(db: Session, payload: dict):
     
     # 3. Product search for each item
     logger.info(f"Searching for products...")
+    product_search = get_product_search_service()
     wish_items = db.query(WishItem).filter(WishItem.letter_id == letter.id).all()
     
     for wish_item in wish_items:
         if wish_item.normalized_name:
             country = child.country or "US"
-            product = gpt_service.search_product(wish_item.normalized_name, country)
+            product = product_search.search(wish_item.normalized_name, country)
             
             if product:
                 wish_item.estimated_price = product.estimated_price

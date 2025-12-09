@@ -200,6 +200,10 @@ class EmailService:
             logger.error("SMTP not configured, cannot send email")
             return False
         
+        logger.info(f"Attempting to send email to {to_email}")
+        logger.info(f"SMTP server: {self.smtp_server}:{self.smtp_port}, SSL: {self.smtp_use_tls}")
+        logger.info(f"From: {self.santa_name} <{self.santa_email}>")
+        
         try:
             # Create message
             if body_html:
@@ -217,18 +221,34 @@ class EmailService:
                 msg["In-Reply-To"] = in_reply_to
                 msg["References"] = in_reply_to
             
-            # Send
-            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
-                if self.smtp_use_tls:
+            # Send - use SSL for port 465, STARTTLS for port 587
+            logger.info("Connecting to SMTP server...")
+            if self.smtp_port == 465 or self.smtp_use_tls:
+                # SSL connection (port 465)
+                with smtplib.SMTP_SSL(self.smtp_server, self.smtp_port, timeout=30) as server:
+                    logger.info(f"Logging in as {self.smtp_username}...")
+                    server.login(self.smtp_username, self.smtp_password)
+                    logger.info("Sending message...")
+                    server.send_message(msg)
+            else:
+                # STARTTLS connection (port 587)
+                with smtplib.SMTP(self.smtp_server, self.smtp_port, timeout=30) as server:
+                    server.ehlo()
+                    logger.info("Starting TLS...")
                     server.starttls()
-                server.login(self.smtp_username, self.smtp_password)
-                server.send_message(msg)
+                    server.ehlo()
+                    logger.info(f"Logging in as {self.smtp_username}...")
+                    server.login(self.smtp_username, self.smtp_password)
+                    logger.info("Sending message...")
+                    server.send_message(msg)
             
-            logger.info(f"Sent Santa reply to {to_email}")
+            logger.info(f"Successfully sent Santa reply to {to_email}")
             return True
             
         except Exception as e:
-            logger.error(f"Error sending email: {e}")
+            logger.error(f"Error sending email to {to_email}: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             return False
 
 

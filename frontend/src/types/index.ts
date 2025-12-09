@@ -77,6 +77,7 @@ export interface Letter {
   processed_at: string | null;
   created_at: string;
   child_name?: string;
+  wish_item_count?: number;
   wish_items?: WishItem[];
   santa_reply?: SantaReply;
   moderation_flags?: ModerationFlag[];
@@ -91,10 +92,11 @@ export interface LetterTimeline {
 export interface WishItem {
   id: number;
   letter_id: number;
+  child_id?: number;  // Added for filtering display
   raw_text: string;
   normalized_name: string | null;
   category: string | null;
-  status: 'pending' | 'approved' | 'denied';
+  status: string;
   denial_reason: string | null;
   denial_note: string | null;
   estimated_price: number | null;
@@ -189,28 +191,16 @@ export interface ChildrenState {
 
 export interface WishlistState {
   items: WishItem[];
-  summary: WishlistSummary | null;
   isLoading: boolean;
-  filters: {
-    child_id?: number;
-    year?: number;
-    category?: string;
-    status?: string;
-  };
-  setFilters: (filters: WishlistState['filters']) => void;
-  fetchItems: () => Promise<void>;
-  fetchSummary: () => Promise<void>;
-  updateItem: (id: number, updates: { status?: string; denial_reason?: string; denial_note?: string }) => Promise<void>;
+  fetchItems: (filters?: { child_id?: number; status?: string; year?: number }) => Promise<void>;
+  updateItem: (id: number, updates: Partial<WishItem>) => Promise<void>;
 }
 
 export interface LettersState {
   letters: Letter[];
-  timeline: LetterTimeline[];
-  currentLetter: Letter | null;
   isLoading: boolean;
-  fetchLetters: (childId?: number, year?: number) => Promise<void>;
-  fetchTimeline: (childId?: number) => Promise<void>;
-  fetchLetter: (id: number) => Promise<void>;
+  fetchLetters: (filters?: { child_id?: number; year?: number }) => Promise<void>;
+  fetchLetter: (id: number) => Promise<Letter>;
 }
 
 export interface DeedsState {
