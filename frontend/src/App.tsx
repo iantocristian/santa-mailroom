@@ -6,6 +6,7 @@ import { useNotificationsStore } from './store/notificationsStore';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Children from './pages/Children';
 import Sidebar from './components/Sidebar';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -109,7 +110,7 @@ function App() {
         element={
           <ProtectedRoute>
             <AppLayout>
-              <PlaceholderPage title="Children" icon="👧" />
+              <Children />
             </AppLayout>
           </ProtectedRoute>
         }

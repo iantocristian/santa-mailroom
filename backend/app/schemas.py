@@ -49,12 +49,12 @@ class FamilyUpdate(BaseModel):
 
 class FamilyResponse(BaseModel):
     id: int
-    name: Optional[str]
-    language: str
-    budget_alert_threshold: Optional[Decimal]
-    moderation_strictness: str
-    data_retention_years: int
-    timezone: str
+    name: Optional[str] = None
+    language: str = "en"
+    budget_alert_threshold: Optional[Decimal] = None
+    moderation_strictness: str = "medium"
+    data_retention_years: int = 5
+    timezone: str = "UTC"
     created_at: datetime
 
     class Config:

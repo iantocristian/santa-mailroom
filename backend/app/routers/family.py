@@ -80,10 +80,13 @@ def get_family_stats(
     from app.models import Child, Letter, WishItem, Notification, ModerationFlag, GoodDeed
     from sqlalchemy import func
     
+    # Return empty stats if no family yet
     if not current_user.family:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Family not found"
+        return FamilyStats(
+            total_children=0, total_letters=0, total_wish_items=0,
+            pending_wish_items=0, approved_wish_items=0, denied_wish_items=0,
+            total_estimated_budget=None, unread_notifications=0,
+            pending_moderation_flags=0, completed_deeds=0, pending_deeds=0
         )
     
     family_id = current_user.family.id

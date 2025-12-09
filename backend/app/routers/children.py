@@ -23,10 +23,7 @@ def list_children(
 ):
     """List all children in the current user's family."""
     if not current_user.family:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Family not found. Please create a family first."
-        )
+        return []  # No family yet, return empty list
     
     children = current_user.family.children
     result = []

@@ -104,6 +104,15 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_user)
     
+    # Auto-create a family for the new user
+    from app.models import Family
+    family = Family(
+        owner_id=db_user.id,
+        name=f"{db_user.name or 'My'} Family"
+    )
+    db.add(family)
+    db.commit()
+    
     return db_user
 
 

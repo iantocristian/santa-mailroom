@@ -1,6 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
-from typing import Optional
 
 
 class Settings(BaseSettings):
@@ -33,12 +32,9 @@ class Settings(BaseSettings):
     santa_email_address: str = ""
     santa_display_name: str = "Santa Claus"
     
-    # Celery / Task Queue
-    celery_broker_url: str = "redis://localhost:6379/0"
-    celery_result_backend: str = "redis://localhost:6379/0"
-    
-    # Email fetch interval (seconds)
-    email_fetch_interval: int = 60
+    # Worker settings
+    worker_poll_interval: int = 5  # seconds between job checks
+    email_fetch_interval: int = 60  # seconds between email fetches
     
     # Invite-only registration (Ed25519 public key in PEM format)
     invite_public_key: str = ""

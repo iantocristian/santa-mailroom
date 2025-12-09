@@ -1,12 +1,14 @@
 import logging
 import sys
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import engine, Base
+from sqlalchemy.orm import Session
+from app.database import engine, Base, get_db
 
 # Import all models to ensure they're registered with Base
 from app import models  # noqa: F401
+from app import job_queue  # noqa: F401 - Import to create jobs table
 
 # Import routers
 from app.routers import auth, family, children, wishlist, letters, deeds, moderation, notifications
@@ -56,3 +58,15 @@ app.include_router(notifications.router)
 @app.get("/api/health")
 def health_check():
     return {"status": "healthy", "service": "santa-wishlist"}
+
+
+@app.post("/api/admin/fetch-emails")
+def trigger_email_fetch(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """Manually trigger an email fetch job (admin only)."""
+    from app.worker import enqueue_job
+    job = enqueue_job(db, "fetch_emails", priority=10)
+    return {"message": "Email fetch job queued", "job_id": job.id}
+

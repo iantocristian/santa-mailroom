@@ -18,17 +18,6 @@ services:
       timeout: 5s
       retries: 5
 
-  redis:
-    image: redis:7-alpine
-    restart: always
-    networks:
-      - appnet
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   backend:
     build: ./backend
     restart: always
@@ -36,48 +25,22 @@ services:
       - backend.env
     environment:
       DATABASE_URL: postgresql://santa:${POSTGRES_PASSWORD:-supersecret}@db:5432/santa
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
     depends_on:
       db:
-        condition: service_healthy
-      redis:
         condition: service_healthy
     networks:
       - appnet
 
-  celery-worker:
+  worker:
     build: ./backend
     restart: always
-    command: celery -A app.celery_app worker --loglevel=info
+    command: python -m app.worker both --poll-interval 5 --fetch-interval 60
     env_file:
       - backend.env
     environment:
       DATABASE_URL: postgresql://santa:${POSTGRES_PASSWORD:-supersecret}@db:5432/santa
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
     depends_on:
       db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - appnet
-
-  celery-beat:
-    build: ./backend
-    restart: always
-    command: celery -A app.celery_app beat --loglevel=info
-    env_file:
-      - backend.env
-    environment:
-      DATABASE_URL: postgresql://santa:${POSTGRES_PASSWORD:-supersecret}@db:5432/santa
-      CELERY_BROKER_URL: redis://redis:6379/0
-      CELERY_RESULT_BACKEND: redis://redis:6379/0
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
         condition: service_healthy
     networks:
       - appnet
