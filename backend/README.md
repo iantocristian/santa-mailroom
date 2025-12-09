@@ -63,3 +63,43 @@ python invite_cli.py create-token -k invite.key -n "Parent Name"
 - `GET/POST /api/deeds` - Manage good deeds
 - `GET /api/moderation` - Content flags
 - `GET /api/notifications` - Parent alerts
+
+## Email Safety Layer
+
+All AI-generated emails are verified by a secondary LLM before being sent to children. This provides defense-in-depth against inappropriate content.
+
+**Configuration:**
+```bash
+# In .env
+GPT_SAFETY_MODEL=gpt-4o-mini        # Model for safety checks
+EMAIL_SAFETY_CHECK_ENABLED=true     # Set to false to disable
+```
+
+**What it checks:**
+- Inappropriate language
+- Adult themes (violence, drugs, etc.)
+- Harmful content
+- Manipulation tactics
+- Privacy concerns
+- Tone issues
+
+If safety check fails, the email is **blocked** and logged.
+
+## Testing
+
+```bash
+# Install test dependencies
+pip install -e ".[dev]"
+
+# Run all tests (115 security tests)
+pytest tests/ -v
+
+# Run specific test file
+pytest tests/test_auth_security.py -v
+```
+
+**Test coverage includes:**
+- Authentication security (tokens, login)
+- Authorization (IDOR prevention)
+- Input validation (SQL injection, XSS)
+

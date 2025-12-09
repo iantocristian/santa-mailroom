@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     gpt_model: str = "gpt-4o"
     gpt_extraction_model: str = "gpt-4o-mini"
+    gpt_safety_model: str = "gpt-4o-mini"  # Model for email safety checks
+    email_safety_check_enabled: bool = True  # Enable/disable email safety checks
     
     # Email - Incoming (POP3/IMAP)
     pop3_server: str = ""

@@ -41,6 +41,7 @@ class GPTService:
         self.client = OpenAI(api_key=settings.openai_api_key) if settings.openai_api_key else None
         self.model = settings.gpt_model
         self.extraction_model = settings.gpt_extraction_model
+        self.safety_model = settings.gpt_safety_model
     
     def _chat(self, messages: List[dict], model: Optional[str] = None, response_format: Optional[dict] = None) -> str:
         """Make a chat completion request."""
@@ -421,6 +422,95 @@ Write a SHORT, celebratory email from Santa congratulating them!"""
         except Exception as e:
             logger.error(f"Error generating congrats email: {e}")
             return f"Ho ho ho, {child_name}!\n\n🎉 WONDERFUL NEWS! 🎉\n\nSanta just heard that you completed your good deed: {deed_description}\n\nI am SO PROUD of you! This is exactly the kind of kindness that makes Christmas magic real. You've made Santa's heart very happy today!\n\nKeep being the amazing person you are!\n\nWith extra jingle bells,\n🎅 Santa Claus"
+    
+    def check_email_safety(
+        self,
+        email_content: str,
+        child_name: str,
+        email_type: str  # letter_reply, deed_email, deed_congrats
+    ) -> tuple[bool, Optional[str]]:
+        """
+        Check if AI-generated email content is safe for children.
+        Uses a separate GPT model for defense-in-depth safety checking.
+        
+        Args:
+            email_content: The AI-generated email text to verify
+            child_name: The child's name (for context)
+            email_type: Type of email - letter_reply, deed_email, or deed_congrats
+            
+        Returns:
+            Tuple of (is_safe: bool, reason_if_unsafe: Optional[str])
+        """
+        email_type_descriptions = {
+            "letter_reply": "a reply from Santa to a child's letter",
+            "deed_email": "Santa encouraging a child to do a good deed",
+            "deed_congrats": "Santa congratulating a child for completing a good deed"
+        }
+        
+        type_desc = email_type_descriptions.get(email_type, "an email from Santa to a child")
+        
+        system_prompt = f"""You are a child safety content moderator. Your job is to verify that AI-generated emails are safe and appropriate for children.
+
+You are reviewing {type_desc}.
+
+Check for these safety issues:
+1. INAPPROPRIATE LANGUAGE: Profanity, slurs, adult language, crude humor
+2. ADULT THEMES: Violence, sexuality, drugs, alcohol, gambling, scary content
+3. HARMFUL CONTENT: Bullying, discrimination, self-harm references, dangerous activities
+4. MANIPULATION: Pressure tactics, guilt-tripping, inappropriate requests
+5. PRIVACY CONCERNS: Requests for personal information, addresses, phone numbers
+6. OFF-TOPIC: Content that doesn't match the expected email type (e.g., not about Christmas/Santa)
+7. TONE ISSUES: Scary, threatening, overly negative, or discouraging tone
+
+This email is for a child named {child_name}.
+
+Respond with JSON in this exact format:
+{{
+  "is_safe": true/false,
+  "issues_found": ["list of specific issues found, empty if safe"],
+  "severity": "none" | "low" | "medium" | "high",
+  "recommendation": "APPROVE" | "BLOCK",
+  "explanation": "Brief explanation of your decision"
+}}
+
+Be strict but reasonable. Santa emails should be warm, encouraging, magical, and age-appropriate."""
+
+        user_prompt = f"""Please review this email that will be sent to a child:
+
+---
+{email_content}
+---
+
+Is this email safe and appropriate for the child {child_name}?"""
+
+        try:
+            response = self._chat(
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                model=self.safety_model,
+                response_format={"type": "json_object"}
+            )
+            
+            data = json.loads(response)
+            is_safe = data.get("is_safe", False) and data.get("recommendation") == "APPROVE"
+            
+            if not is_safe:
+                issues = data.get("issues_found", [])
+                explanation = data.get("explanation", "Safety check failed")
+                severity = data.get("severity", "unknown")
+                reason = f"[{severity.upper()}] {explanation}"
+                if issues:
+                    reason += f" Issues: {', '.join(issues)}"
+                return False, reason
+            
+            return True, None
+            
+        except Exception as e:
+            logger.error(f"Error in email safety check: {e}")
+            # On error, fail closed (block the email) for safety
+            return False, f"Safety check system error: {str(e)}"
 
 
 # Singleton instance

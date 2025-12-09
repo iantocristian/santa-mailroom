@@ -28,7 +28,7 @@ Welcome to Santa's Mailroom! This app helps parents manage their children's lett
 
 ### Step 2: Set Up Your Santa Email
 
-The app uses a dedicated email address (e.g., `santaclausgotmail@gmail.com`) to receive letters from your children. Configure this in your environment settings.
+The app uses a dedicated email address `santaclausgotmail@gmail.com` to receive letters from your children. 
 
 Your children will write to this email address, and Santa will reply automatically!
 

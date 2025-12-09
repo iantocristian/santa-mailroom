@@ -336,6 +336,7 @@ def handle_send_reply(db: Session, payload: dict):
     
     logger.info(f"Sending reply {reply_id}")
     email_service = get_email_service()
+    gpt_service = get_gpt_service()
     
     reply = db.query(SantaReply).filter(SantaReply.id == reply_id).first()
     if not reply:
@@ -346,6 +347,23 @@ def handle_send_reply(db: Session, payload: dict):
     
     if not letter or not child or not letter.from_email:
         raise ValueError(f"Missing data for reply {reply_id}")
+    
+    # Safety check before sending (if enabled)
+    if settings.email_safety_check_enabled:
+        is_safe, safety_reason = gpt_service.check_email_safety(
+            email_content=reply.body_text,
+            child_name=child.name,
+            email_type="letter_reply"
+        )
+        
+        if not is_safe:
+            logger.error(f"SAFETY CHECK FAILED for reply {reply_id} to {child.name}: {safety_reason}")
+            reply.delivery_status = "blocked"
+            reply.delivery_error = f"Safety check failed: {safety_reason}"
+            db.commit()
+            return  # Do not send - blocked for safety
+        
+        logger.info(f"Safety check PASSED for reply {reply_id}")
     
     success = email_service.send_santa_reply(
         to_email=letter.from_email,
@@ -378,6 +396,7 @@ def handle_send_reply(db: Session, payload: dict):
         raise Exception("Failed to send email")
     
     db.commit()
+
 
 
 def handle_send_deed_email(db: Session, payload: dict):
@@ -416,6 +435,31 @@ def handle_send_deed_email(db: Session, payload: dict):
         child_age=child_age,
         deed_description=deed.description
     )
+    
+    # Safety check before sending (if enabled)
+    if settings.email_safety_check_enabled:
+        is_safe, safety_reason = gpt_service.check_email_safety(
+            email_content=email_body,
+            child_name=child.name,
+            email_type="deed_email"
+        )
+        
+        if not is_safe:
+            logger.error(f"SAFETY CHECK FAILED for deed email {deed_id} to {child.name}: {safety_reason}")
+            # Record blocked email
+            sent_email = SentEmail(
+                child_id=child.id,
+                email_type="deed_suggestion",
+                subject="A Special Message from Santa! 🎅",
+                body_text=email_body,
+                deed_id=deed.id,
+                delivery_status="blocked"
+            )
+            db.add(sent_email)
+            db.commit()
+            return  # Do not send - blocked for safety
+        
+        logger.info(f"Safety check PASSED for deed email {deed_id}")
     
     # Send email
     email_service = get_email_service()
@@ -481,6 +525,31 @@ def handle_send_deed_congrats(db: Session, payload: dict):
         deed_description=deed.description,
         parent_note=deed.parent_note
     )
+    
+    # Safety check before sending (if enabled)
+    if settings.email_safety_check_enabled:
+        is_safe, safety_reason = gpt_service.check_email_safety(
+            email_content=email_body,
+            child_name=child.name,
+            email_type="deed_congrats"
+        )
+        
+        if not is_safe:
+            logger.error(f"SAFETY CHECK FAILED for deed congrats {deed_id} to {child.name}: {safety_reason}")
+            # Record blocked email
+            sent_email = SentEmail(
+                child_id=child.id,
+                email_type="deed_congrats",
+                subject="🎉 Santa is SO PROUD of You! 🎉",
+                body_text=email_body,
+                deed_id=deed.id,
+                delivery_status="blocked"
+            )
+            db.add(sent_email)
+            db.commit()
+            return  # Do not send - blocked for safety
+        
+        logger.info(f"Safety check PASSED for deed congrats {deed_id}")
     
     # Send email
     email_service = get_email_service()

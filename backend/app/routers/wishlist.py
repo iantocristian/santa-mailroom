@@ -23,7 +23,7 @@ def list_wish_items(
     child_id: Optional[int] = Query(None, description="Filter by child ID"),
     year: Optional[int] = Query(None, description="Filter by Christmas year"),
     category: Optional[str] = Query(None, description="Filter by category"),
-    status: Optional[str] = Query(None, description="Filter by status (pending/approved/denied)"),
+    item_status: Optional[str] = Query(None, alias="status", description="Filter by status (pending/approved/denied)"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -46,8 +46,8 @@ def list_wish_items(
     if category is not None:
         query = query.filter(WishItem.category == category)
     
-    if status is not None:
-        query = query.filter(WishItem.status == status)
+    if item_status is not None:
+        query = query.filter(WishItem.status == item_status)
     
     return query.order_by(WishItem.created_at.desc()).all()
 
