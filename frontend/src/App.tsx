@@ -12,6 +12,7 @@ import Wishlist from './pages/Wishlist';
 import Letters from './pages/Letters';
 import GoodDeeds from './pages/GoodDeeds';
 import Scrapbook from './pages/Scrapbook';
+import SentEmails from './pages/SentEmails';
 import Sidebar from './components/Sidebar';
 import Snowfall from './components/Snowfall';
 
@@ -161,6 +162,16 @@ function App() {
           <ProtectedRoute>
             <AppLayout>
               <PlaceholderPage title="Moderation" icon="🛡️" />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/sent-emails"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <SentEmails />
             </AppLayout>
           </ProtectedRoute>
         }

@@ -364,6 +364,63 @@ Write a short, magical email from Santa about this good deed!"""
         except Exception as e:
             logger.error(f"Error generating deed email: {e}")
             return f"Ho ho ho, {child_name}!\n\nSanta has a very special request for you! I'd love it if you could: {deed_description}\n\nThis would make Santa so proud! Remember, every act of kindness makes the world a little brighter.\n\nWith love,\n🎅 Santa Claus"
+    
+    def generate_deed_congrats_email(
+        self,
+        child_name: str,
+        child_age: Optional[int],
+        deed_description: str,
+        parent_note: Optional[str] = None
+    ) -> str:
+        """
+        Generate a congratulations email from Santa for completing a good deed.
+        
+        Args:
+            child_name: Child's first name
+            child_age: Child's age (if known)
+            deed_description: The good deed that was completed
+            parent_note: Optional parent's note about how it went
+            
+        Returns:
+            Email body text
+        """
+        age_context = f"The child is approximately {child_age} years old." if child_age else "Age unknown."
+        
+        note_context = ""
+        if parent_note:
+            note_context = f"\n\nNote from parent about how it went: {parent_note}"
+        
+        system_prompt = f"""You are Santa Claus, writing a short, celebratory email to a child who just completed a good deed!
+
+Guidelines:
+- Be VERY excited and proud!
+- Use the child's name naturally
+- Keep it SHORT - 2-3 paragraphs max
+- Specifically mention what they did
+- Make them feel special and proud
+- End with encouragement to keep being kind
+
+{age_context}"""
+
+        user_prompt = f"""Child's name: {child_name}
+
+Good deed they completed: {deed_description}{note_context}
+
+Write a SHORT, celebratory email from Santa congratulating them!"""
+
+        try:
+            response = self._chat(
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                model=self.model
+            )
+            return response
+            
+        except Exception as e:
+            logger.error(f"Error generating congrats email: {e}")
+            return f"Ho ho ho, {child_name}!\n\n🎉 WONDERFUL NEWS! 🎉\n\nSanta just heard that you completed your good deed: {deed_description}\n\nI am SO PROUD of you! This is exactly the kind of kindness that makes Christmas magic real. You've made Santa's heart very happy today!\n\nKeep being the amazing person you are!\n\nWith extra jingle bells,\n🎅 Santa Claus"
 
 
 # Singleton instance

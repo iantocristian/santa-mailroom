@@ -262,3 +262,32 @@ class Notification(Base):
 
     # Relationships
     family = relationship("Family", back_populates="notifications")
+
+
+class SentEmail(Base):
+    """Track all Santa emails sent to children"""
+    __tablename__ = "sent_emails"
+
+    id = Column(Integer, primary_key=True, index=True)
+    child_id = Column(Integer, ForeignKey("children.id"), nullable=False)
+    
+    # Email details
+    email_type = Column(String(50), nullable=False)  # letter_reply, deed_suggestion, deed_congrats
+    subject = Column(String(500), nullable=True)
+    body_text = Column(Text, nullable=False)
+    to_email = Column(String(255), nullable=True)  # May be null for privacy
+    
+    # Related entities
+    letter_id = Column(Integer, ForeignKey("letters.id"), nullable=True)
+    santa_reply_id = Column(Integer, ForeignKey("santa_replies.id"), nullable=True)
+    deed_id = Column(Integer, ForeignKey("good_deeds.id"), nullable=True)
+    
+    # Status
+    sent_at = Column(DateTime(timezone=True), server_default=func.now())
+    delivery_status = Column(String(20), default="sent")  # sent, failed
+    
+    # Relationships
+    child = relationship("Child")
+    letter = relationship("Letter")
+    santa_reply = relationship("SantaReply")
+    deed = relationship("GoodDeed")

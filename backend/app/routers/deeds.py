@@ -165,10 +165,11 @@ def update_good_deed(
     return deed
 
 
-@router.put("/{deed_id}/complete", response_model=GoodDeedResponse)
+@router.post("/{deed_id}/complete", response_model=GoodDeedResponse)
 def complete_good_deed(
     deed_id: int,
-    parent_note: Optional[str] = None,
+    body: Optional[dict] = None,
+    send_email: bool = Query(True, description="Send congratulations email to child"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -185,11 +186,24 @@ def complete_good_deed(
     
     deed.completed = True
     deed.completed_at = datetime.utcnow()
+    
+    # Extract parent_note from body if provided
+    parent_note = body.get("parent_note") if body else None
     if parent_note:
         deed.parent_note = parent_note
     
     db.commit()
     db.refresh(deed)
+    
+    # Queue congratulations email if requested
+    if send_email:
+        job = Job(
+            task_type="send_deed_congrats",
+            payload={"deed_id": deed.id},
+            priority=1
+        )
+        db.add(job)
+        db.commit()
     
     return deed
 

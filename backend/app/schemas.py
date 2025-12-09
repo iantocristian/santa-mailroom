@@ -292,5 +292,27 @@ class ExportResponse(BaseModel):
     expires_at: Optional[datetime] = None
 
 
+# ============== Sent Email Schemas ==============
+
+class SentEmailResponse(BaseModel):
+    id: int
+    child_id: int
+    email_type: str  # letter_reply, deed_suggestion, deed_congrats
+    subject: Optional[str]
+    body_text: str
+    letter_id: Optional[int]
+    santa_reply_id: Optional[int]
+    deed_id: Optional[int]
+    sent_at: datetime
+    delivery_status: str
+
+    class Config:
+        from_attributes = True
+
+
+class SentEmailWithChild(SentEmailResponse):
+    child_name: str
+
+
 # Forward references for nested models
 LetterWithDetails.model_rebuild()

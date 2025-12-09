@@ -19,6 +19,7 @@ export default function Sidebar({ isOpen = true, onClose = () => { } }: SidebarP
         { path: '/letters', icon: '✉️', label: 'Letters' },
         { path: '/timeline', icon: '📖', label: 'Scrapbook' },
         { path: '/deeds', icon: '⭐', label: 'Good Deeds' },
+        { path: '/sent-emails', icon: '📤', label: 'Sent Emails' },
     ];
 
     const settingsItems = [

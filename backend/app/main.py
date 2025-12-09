@@ -11,7 +11,7 @@ from app import models  # noqa: F401
 from app import job_queue  # noqa: F401 - Import to create jobs table
 
 # Import routers
-from app.routers import auth, family, children, wishlist, letters, deeds, moderation, notifications
+from app.routers import auth, family, children, wishlist, letters, deeds, moderation, notifications, sent_emails
 
 # Configure logging
 logging.basicConfig(
@@ -53,6 +53,7 @@ app.include_router(letters.router)
 app.include_router(deeds.router)
 app.include_router(moderation.router)
 app.include_router(notifications.router)
+app.include_router(sent_emails.router)
 
 
 @app.get("/api/health")
