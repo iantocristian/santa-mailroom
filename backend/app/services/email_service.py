@@ -26,6 +26,7 @@ class IncomingEmail:
     message_id: str
     from_email: str
     from_name: Optional[str]
+    to_email: str  # Recipient address (for extracting family code)
     subject: str
     body_text: str
     body_html: Optional[str]
@@ -133,6 +134,8 @@ class EmailService:
                     message_id = msg.get("Message-ID", f"unknown-{i}-{datetime.utcnow().timestamp()}")
                     from_header = msg.get("From", "")
                     from_name, from_email_addr = parseaddr(from_header)
+                    to_header = msg.get("To", "")
+                    _, to_email_addr = parseaddr(to_header)
                     subject = msg.get("Subject", "(No Subject)")
                     
                     # Try to get date
@@ -152,6 +155,7 @@ class EmailService:
                         message_id=message_id,
                         from_email=from_email_addr,
                         from_name=from_name if from_name else None,
+                        to_email=to_email_addr,
                         subject=subject,
                         body_text=body_text,
                         body_html=body_html,

@@ -74,7 +74,8 @@ def test_user(db: Session) -> User:
     # Create family for user
     family = Family(
         owner_id=user.id,
-        name="Test Family"
+        name="Test Family",
+        santa_code="TEST1234"
     )
     db.add(family)
     db.commit()
@@ -101,7 +102,8 @@ def test_user_2(db: Session) -> User:
     # Create family for user
     family = Family(
         owner_id=user.id,
-        name="Other Family"
+        name="Other Family",
+        santa_code="TEST5678"
     )
     db.add(family)
     db.commit()

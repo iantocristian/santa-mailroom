@@ -6,8 +6,17 @@ from app.database import get_db
 from app.auth import get_current_user
 from app.models import User, Family
 from app.schemas import FamilyResponse, FamilyUpdate, FamilyStats, FamilyCreate
+from app.config import get_settings
 
 router = APIRouter(prefix="/api/family", tags=["family"])
+settings = get_settings()
+
+
+def build_santa_email(santa_code: str) -> str:
+    """Build the full Santa email address for a family code."""
+    base_email = settings.santa_email_address or "santaclausgotmail@gmail.com"
+    local, domain = base_email.split("@")
+    return f"{local}+{santa_code}@{domain}"
 
 
 @router.get("", response_model=FamilyResponse)
@@ -21,7 +30,11 @@ def get_family(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Family not found. Please create a family first."
         )
-    return current_user.family
+    family = current_user.family
+    # Add computed santa_email
+    response = FamilyResponse.model_validate(family)
+    response.santa_email = build_santa_email(family.santa_code)
+    return response
 
 
 @router.post("", response_model=FamilyResponse, status_code=status.HTTP_201_CREATED)

@@ -15,7 +15,7 @@ from sqlalchemy import and_
 from app.database import SessionLocal
 from app.job_queue import Job, JobStatus
 from app.models import (
-    Child, Letter, WishItem, SantaReply, ModerationFlag, GoodDeed,
+    Child, Letter, WishItem, SantaReply, ModerationFlag, GoodDeed, Family,
     LetterStatus, SentEmail
 )
 from app.services.email_service import get_email_service, EmailService
@@ -106,6 +106,21 @@ def enqueue_job(db: Session, task_type: str, payload: dict = None, priority: int
     return job
 
 
+import re
+
+def extract_family_code(to_email: str) -> Optional[str]:
+    """Extract family code from plus-addressed email.
+    
+    Expected format: santaclausgotmail+SnowPanda@gmail.com
+    Returns the word-based code (e.g., SnowPanda) or None if not found.
+    """
+    if not to_email:
+        return None
+    # Match: anything+CODE@domain where CODE is 2+ word chars (letters)
+    match = re.match(r'^[^+]+\+([A-Za-z]{4,30})@', to_email)
+    return match.group(1) if match else None
+
+
 # ============== Task Handlers ==============
 
 def handle_fetch_emails(db: Session, payload: dict):
@@ -126,22 +141,31 @@ def handle_fetch_emails(db: Session, payload: dict):
             logger.debug(f"Skipping already processed email: {email_msg.message_id}")
             continue
         
-        # Look up child by email hash
+        # Extract and validate family code from recipient address
+        # Expected format: santaclausgotmail+FAMILYCODE@gmail.com
+        family_code = extract_family_code(email_msg.to_email)
+        if not family_code:
+            logger.warning(f"Email without family code: {email_msg.to_email} from {email_msg.from_email}")
+            continue
+        
+        # Look up family by code
+        family = db.query(Family).filter(Family.santa_code == family_code).first()
+        if not family:
+            logger.warning(f"Invalid family code '{family_code}' from {email_msg.from_email}")
+            continue
+        
+        # Look up child by email hash - must belong to this family
         sender_email = email_msg.from_email.lower().strip()
         sender_hash = EmailService.hash_email(sender_email)
-        logger.info(f"Processing email from: {sender_email}")
-        logger.info(f"Computed hash: {sender_hash}")
+        logger.info(f"Processing email from: {sender_email} for family code: {family_code}")
         
-        # Log all registered email hashes for debugging
-        all_children = db.query(Child).all()
-        for c in all_children:
-            logger.debug(f"Registered child '{c.name}' hash: {c.email_hash}")
-        
-        child = db.query(Child).filter(Child.email_hash == sender_hash).first()
+        child = db.query(Child).filter(
+            Child.email_hash == sender_hash,
+            Child.family_id == family.id
+        ).first()
         
         if not child:
-            logger.warning(f"Email from unregistered address: {sender_email} (hash: {sender_hash})")
-            logger.warning(f"Registered hashes: {[c.email_hash for c in all_children]}")
+            logger.warning(f"Email from unregistered address for family {family_code}: {sender_email}")
             continue
         
         # Determine Christmas year

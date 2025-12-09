@@ -1,4 +1,6 @@
 from datetime import timedelta
+import secrets
+import string
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -7,7 +9,7 @@ from jwt.exceptions import InvalidTokenError
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from app.database import get_db
-from app.models import User
+from app.models import User, Family
 from app.schemas import UserCreate, UserResponse, Token
 from app.auth import (
     get_password_hash,
@@ -19,6 +21,32 @@ from app.config import get_settings
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 settings = get_settings()
+
+# Word lists for friendly family codes
+ADJECTIVES = [
+    "Snow", "Frost", "Jolly", "Merry", "Cozy", "Bright", "Sparkle", "Twinkle",
+    "Golden", "Silver", "Crystal", "Velvet", "Rosy", "Starry", "Candy", "Ginger",
+    "Holly", "Ivy", "Cocoa", "Maple", "Winter", "Arctic", "Nordic", "Alpine",
+    "Sugar", "Plum", "Cherry", "Mint", "Snowy"
+]
+
+ANIMALS = [
+    "Polar", "Owl", "Fox", "Bear", "Bunny", "Panda", "Koala", "Otter",
+    "Seal", "Husky", "Wolf", "Dove", "Robin", "Finch", "Swan", "Deer",
+    "Elk", "Moose", "Beaver", "Lynx", "Hare"
+]
+
+
+def generate_santa_code(db: Session) -> str:
+    """Generate a unique friendly word code for a family (e.g., SnowPanda)."""
+    while True:
+        adjective = secrets.choice(ADJECTIVES)
+        animal = secrets.choice(ANIMALS)
+        code = f"{adjective}{animal}"
+        # Check uniqueness
+        existing = db.query(Family).filter(Family.santa_code == code).first()
+        if not existing:
+            return code
 
 
 def verify_invite_token(token: str) -> bool:
@@ -104,11 +132,12 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_user)
     
-    # Auto-create a family for the new user
-    from app.models import Family
+    # Auto-create a family for the new user with unique santa code
+    santa_code = generate_santa_code(db)
     family = Family(
         owner_id=db_user.id,
-        name=f"{db_user.name or 'My'} Family"
+        name=f"{db_user.name or 'My'} Family",
+        santa_code=santa_code
     )
     db.add(family)
     db.commit()

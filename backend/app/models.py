@@ -68,6 +68,7 @@ class Family(Base):
     id = Column(Integer, primary_key=True, index=True)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False, unique=True)
     name = Column(String(100))  # e.g., "The Smith Family"
+    santa_code = Column(String(30), unique=True, index=True, nullable=False)  # e.g., "SnowPanda"
     
     # Settings
     language = Column(String(10), default="en")

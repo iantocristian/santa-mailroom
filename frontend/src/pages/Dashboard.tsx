@@ -5,15 +5,20 @@ import { useChildrenStore } from '../store/childrenStore';
 import { useNotificationsStore } from '../store/notificationsStore';
 
 export default function Dashboard() {
-    const { stats, fetchStats } = useFamilyStore();
+    const { family, stats, fetchFamily, fetchStats } = useFamilyStore();
     const { children, fetchChildren } = useChildrenStore();
     const { notifications, fetchNotifications } = useNotificationsStore();
 
     useEffect(() => {
+        fetchFamily();
         fetchStats();
         fetchChildren();
         fetchNotifications();
-    }, [fetchStats, fetchChildren, fetchNotifications]);
+    }, [fetchFamily, fetchStats, fetchChildren, fetchNotifications]);
+
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text);
+    };
 
     return (
         <div className="page-content">
@@ -23,6 +28,61 @@ export default function Dashboard() {
                     Santa's Dashboard
                 </h1>
             </div>
+
+            {/* Santa Email Banner */}
+            {family?.santa_email && (
+                <div className="santa-email-banner" style={{
+                    background: 'linear-gradient(135deg, #1a472a 0%, #2d5a3f 50%, #1a472a 100%)',
+                    borderRadius: 16,
+                    padding: '24px 32px',
+                    marginBottom: 32,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 24,
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+                    border: '2px solid rgba(212, 175, 55, 0.3)'
+                }}>
+                    <div style={{ fontSize: 64, lineHeight: 1 }}>🎅</div>
+                    <div style={{ flex: 1 }}>
+                        <div style={{
+                            fontSize: '0.85rem',
+                            color: 'rgba(255,255,255,0.7)',
+                            marginBottom: 6,
+                            textTransform: 'uppercase',
+                            letterSpacing: 1
+                        }}>
+                            ✉️ Tell your children to write to Santa at:
+                        </div>
+                        <div style={{
+                            fontSize: '1.4rem',
+                            fontWeight: 700,
+                            color: '#d4af37',
+                            fontFamily: 'monospace',
+                            letterSpacing: 0.5
+                        }}>
+                            {family.santa_email}
+                        </div>
+                        <div style={{
+                            fontSize: '0.8rem',
+                            color: 'rgba(255,255,255,0.5)',
+                            marginTop: 6
+                        }}>
+                            Family Code: <strong style={{ color: 'rgba(255,255,255,0.8)' }}>{family.santa_code}</strong>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => copyToClipboard(family.santa_email || '')}
+                        className="btn btn-primary"
+                        style={{
+                            background: 'rgba(212, 175, 55, 0.2)',
+                            border: '1px solid #d4af37',
+                            color: '#d4af37'
+                        }}
+                    >
+                        📋 Copy Email
+                    </button>
+                </div>
+            )}
 
             {/* Stats Grid */}
             <div className="stats-grid">

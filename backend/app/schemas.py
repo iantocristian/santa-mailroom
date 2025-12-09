@@ -50,6 +50,8 @@ class FamilyUpdate(BaseModel):
 class FamilyResponse(BaseModel):
     id: int
     name: Optional[str] = None
+    santa_code: str  # Unique code for email routing
+    santa_email: Optional[str] = None  # Computed: santaclausgotmail+CODE@gmail.com
     language: str = "en"
     budget_alert_threshold: Optional[Decimal] = None
     moderation_strictness: str = "medium"

@@ -21,6 +21,8 @@ export interface AuthState {
 export interface Family {
   id: number;
   name: string | null;
+  santa_code: string;  // Unique code for email routing
+  santa_email: string | null;  // Full Santa email with family code
   language: string;
   budget_alert_threshold: number | null;
   moderation_strictness: string;
