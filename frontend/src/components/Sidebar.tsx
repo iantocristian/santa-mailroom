@@ -3,11 +3,11 @@ import { useAuthStore } from '../store/authStore';
 import { useNotificationsStore } from '../store/notificationsStore';
 
 interface SidebarProps {
-    isOpen: boolean;
-    onClose: () => void;
+    isOpen?: boolean;
+    onClose?: () => void;
 }
 
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ isOpen = true, onClose = () => { } }: SidebarProps) {
     const location = useLocation();
     const { user, logout } = useAuthStore();
     const { unreadCount } = useNotificationsStore();
@@ -30,18 +30,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
     return (
         <>
-            {/* Mobile overlay */}
-            {isOpen && (
-                <div
-                    style={{
-                        position: 'fixed',
-                        inset: 0,
-                        background: 'rgba(0,0,0,0.5)',
-                        zIndex: 98,
-                    }}
-                    onClick={onClose}
-                />
-            )}
+            {/* Mobile overlay - hidden on desktop via CSS */}
+            <div
+                className={`sidebar-overlay ${isOpen ? 'visible' : ''}`}
+                onClick={onClose}
+            />
 
             <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
                 <div className="sidebar-header">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
 import { useFamilyStore } from './store/familyStore';
@@ -13,6 +13,7 @@ import Letters from './pages/Letters';
 import GoodDeeds from './pages/GoodDeeds';
 import Scrapbook from './pages/Scrapbook';
 import Sidebar from './components/Sidebar';
+import Snowfall from './components/Snowfall';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuthStore();
@@ -35,24 +36,18 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AppLayout({ children }: { children: React.ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { fetchFamily } = useFamilyStore();
-  const { fetchUnreadCount } = useNotificationsStore();
+  const { fetchNotifications } = useNotificationsStore();
 
   useEffect(() => {
     fetchFamily();
-    fetchUnreadCount();
-  }, [fetchFamily, fetchUnreadCount]);
+    fetchNotifications();
+  }, [fetchFamily, fetchNotifications]);
 
   return (
     <div className="app-layout">
-      <button
-        className="mobile-menu-btn"
-        onClick={() => setSidebarOpen(true)}
-      >
-        ☰
-      </button>
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Snowfall />
+      <Sidebar />
       <main className="main-content">
         {children}
       </main>
