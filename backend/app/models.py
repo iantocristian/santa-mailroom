@@ -53,12 +53,26 @@ class User(Base):
     email = Column(String(255), unique=True, index=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
     name = Column(String(100))
-    invite_token = Column(String(512), unique=True, index=True, nullable=True)
+    invite_code_id = Column(Integer, ForeignKey("invite_codes.id"), nullable=True)  # Link to invite code used
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationship to family
     family = relationship("Family", back_populates="owner", uselist=False)
+
+
+class InviteCode(Base):
+    """Short invite codes for parent registration (e.g., SANTA-XK7M2P)"""
+    __tablename__ = "invite_codes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    code = Column(String(20), unique=True, index=True, nullable=False)  # e.g., "SANTA-XK7M2P"
+    note = Column(String(200), nullable=True)  # Optional note about who this is for
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    used_at = Column(DateTime(timezone=True), nullable=True)  # When it was used
+    used_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # Who used it
+    expires_at = Column(DateTime(timezone=True), nullable=True)  # Optional expiry
+    is_active = Column(Boolean, default=True)  # Can be deactivated
 
 
 class Family(Base):

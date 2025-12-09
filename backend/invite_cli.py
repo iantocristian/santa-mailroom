@@ -1,100 +1,142 @@
 #!/usr/bin/env python3
-"""CLI tool for generating Ed25519 keypairs and invite tokens."""
+"""CLI tool for generating short invite codes."""
 
 import argparse
 import sys
-import uuid
-from datetime import datetime
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
-from cryptography.hazmat.primitives import serialization
-import jwt
+import secrets
+import string
+from datetime import datetime, timedelta
+
+# Add parent directory to path for imports
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from app.database import SessionLocal
+from app.models import InviteCode
 
 
-def generate_keypair():
-    """Generate a new Ed25519 keypair."""
-    private_key = Ed25519PrivateKey.generate()
-    public_key = private_key.public_key()
-    
-    private_pem = private_key.private_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption()
-    ).decode()
-    
-    public_pem = public_key.public_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PublicFormat.SubjectPublicKeyInfo
-    ).decode()
-    
-    return private_pem, public_pem
+def generate_code() -> str:
+    """Generate a short invite code like SANTA-XK7M2P."""
+    chars = string.ascii_uppercase + string.digits
+    # Exclude confusing characters
+    chars = chars.replace('O', '').replace('0', '').replace('I', '').replace('1', '').replace('L', '')
+    random_part = ''.join(secrets.choice(chars) for _ in range(6))
+    return f"SANTA-{random_part}"
 
 
-def create_invite_token(private_key_pem: str, note: str = "") -> str:
-    """Create a signed invite token."""
-    private_key = serialization.load_pem_private_key(
-        private_key_pem.encode(),
-        password=None
-    )
-    
-    payload = {
-        "jti": str(uuid.uuid4()),  # Unique token ID
-        "iat": int(datetime.utcnow().timestamp()),
-        "type": "invite",
-    }
-    if note:
-        payload["note"] = note
-    
-    token = jwt.encode(payload, private_key, algorithm="EdDSA")
-    return token
+def create_invite(note: str = "", expires_days: int = None) -> str:
+    """Create a new invite code and store it in the database."""
+    db = SessionLocal()
+    try:
+        # Generate unique code
+        while True:
+            code = generate_code()
+            existing = db.query(InviteCode).filter(InviteCode.code == code).first()
+            if not existing:
+                break
+        
+        # Create invite
+        expires_at = None
+        if expires_days:
+            expires_at = datetime.utcnow() + timedelta(days=expires_days)
+        
+        invite = InviteCode(
+            code=code,
+            note=note if note else None,
+            expires_at=expires_at
+        )
+        db.add(invite)
+        db.commit()
+        
+        return code
+    finally:
+        db.close()
+
+
+def list_invites(show_used: bool = False):
+    """List all invite codes."""
+    db = SessionLocal()
+    try:
+        query = db.query(InviteCode)
+        if not show_used:
+            query = query.filter(InviteCode.used_at.is_(None), InviteCode.is_active == True)
+        
+        invites = query.order_by(InviteCode.created_at.desc()).all()
+        
+        print(f"{'Code':<15} {'Note':<20} {'Created':<12} {'Status':<10}")
+        print("-" * 60)
+        
+        for invite in invites:
+            created = invite.created_at.strftime("%Y-%m-%d") if invite.created_at else "N/A"
+            
+            if invite.used_at:
+                status = "Used"
+            elif not invite.is_active:
+                status = "Disabled"
+            elif invite.expires_at and invite.expires_at < datetime.utcnow():
+                status = "Expired"
+            else:
+                status = "Active"
+            
+            note = (invite.note[:17] + "...") if invite.note and len(invite.note) > 20 else (invite.note or "")
+            print(f"{invite.code:<15} {note:<20} {created:<12} {status:<10}")
+        
+        if not invites:
+            print("No invite codes found.")
+    finally:
+        db.close()
+
+
+def revoke_invite(code: str):
+    """Revoke an invite code."""
+    db = SessionLocal()
+    try:
+        invite = db.query(InviteCode).filter(InviteCode.code == code).first()
+        if not invite:
+            print(f"Error: Invite code '{code}' not found.", file=sys.stderr)
+            return False
+        
+        if invite.used_at:
+            print(f"Warning: This code has already been used.", file=sys.stderr)
+        
+        invite.is_active = False
+        db.commit()
+        print(f"Revoked: {code}")
+        return True
+    finally:
+        db.close()
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Invite token management CLI")
+    parser = argparse.ArgumentParser(description="Invite code management CLI")
     subparsers = parser.add_subparsers(dest="command", help="Commands")
     
-    # Generate keypair command
-    gen_parser = subparsers.add_parser("generate-keys", help="Generate new Ed25519 keypair")
-    gen_parser.add_argument("--output", "-o", help="Output file prefix (creates PREFIX.key and PREFIX.pub)")
+    # Create invite command
+    create_parser = subparsers.add_parser("create", help="Create a new invite code")
+    create_parser.add_argument("--note", "-n", default="", help="Optional note about who this is for")
+    create_parser.add_argument("--expires", "-e", type=int, help="Days until expiry (optional)")
+    create_parser.add_argument("--count", "-c", type=int, default=1, help="Number of codes to create")
     
-    # Create token command
-    token_parser = subparsers.add_parser("create-token", help="Create a new invite token")
-    token_parser.add_argument("--key", "-k", required=True, help="Path to private key file")
-    token_parser.add_argument("--note", "-n", default="", help="Optional note/identifier for this invite")
+    # List invites command
+    list_parser = subparsers.add_parser("list", help="List invite codes")
+    list_parser.add_argument("--all", "-a", action="store_true", help="Show used/expired codes too")
+    
+    # Revoke invite command
+    revoke_parser = subparsers.add_parser("revoke", help="Revoke an invite code")
+    revoke_parser.add_argument("code", help="The invite code to revoke")
     
     args = parser.parse_args()
     
-    if args.command == "generate-keys":
-        private_pem, public_pem = generate_keypair()
-        
-        if args.output:
-            with open(f"{args.output}.key", "w") as f:
-                f.write(private_pem)
-            with open(f"{args.output}.pub", "w") as f:
-                f.write(public_pem)
-            print(f"Keys written to {args.output}.key and {args.output}.pub")
-            print(f"\nAdd this to your .env file:")
-            # Escape newlines for env file
-            escaped_pub = public_pem.replace("\n", "\\n")
-            print(f'INVITE_PUBLIC_KEY="{escaped_pub}"')
-        else:
-            print("=== PRIVATE KEY (keep secret!) ===")
-            print(private_pem)
-            print("=== PUBLIC KEY (add to .env) ===")
-            print(public_pem)
-            print("\n=== For .env file ===")
-            escaped_pub = public_pem.replace("\n", "\\n")
-            print(f'INVITE_PUBLIC_KEY="{escaped_pub}"')
+    if args.command == "create":
+        for i in range(args.count):
+            code = create_invite(args.note, args.expires)
+            print(code)
     
-    elif args.command == "create-token":
-        try:
-            with open(args.key, "r") as f:
-                private_key_pem = f.read()
-        except FileNotFoundError:
-            print(f"Error: Key file not found: {args.key}", file=sys.stderr)
-            sys.exit(1)
-        
-        token = create_invite_token(private_key_pem, args.note)
-        print(token)
+    elif args.command == "list":
+        list_invites(show_used=args.all)
+    
+    elif args.command == "revoke":
+        revoke_invite(args.code)
     
     else:
         parser.print_help()
@@ -103,4 +145,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

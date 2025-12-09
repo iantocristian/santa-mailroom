@@ -1,15 +1,11 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 import secrets
 import string
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-import jwt
-from jwt.exceptions import InvalidTokenError
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from app.database import get_db
-from app.models import User, Family
+from app.models import User, Family, InviteCode
 from app.schemas import UserCreate, UserResponse, Token
 from app.auth import (
     get_password_hash,
@@ -49,61 +45,36 @@ def generate_santa_code(db: Session) -> str:
             return code
 
 
-def verify_invite_token(token: str) -> bool:
-    """Verify the invite token signature using Ed25519 public key."""
-    import logging
-    logger = logging.getLogger(__name__)
+def validate_invite_code(db: Session, code: str) -> InviteCode:
+    """Validate an invite code and return the InviteCode object if valid."""
+    invite = db.query(InviteCode).filter(InviteCode.code == code).first()
     
-    logger.info(f"Verifying invite token: {token[:50]}...")
-    logger.info(f"Public key configured: {bool(settings.invite_public_key)}")
+    if not invite:
+        return None
     
-    if not settings.invite_public_key:
-        logger.error("Invite public key not configured")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Invite system not configured"
-        )
-    try:
-        # Load the public key (handle escaped newlines from .env)
-        key_pem = settings.invite_public_key.replace("\\n", "\n")
-        logger.info(f"Key PEM starts with: {key_pem[:50]}")
-        
-        public_key = serialization.load_pem_public_key(key_pem.encode())
-        logger.info(f"Public key type: {type(public_key)}")
-        
-        if not isinstance(public_key, Ed25519PublicKey):
-            logger.error(f"Wrong key type: {type(public_key)}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Invalid public key type"
-            )
-        # Decode and verify the JWT with EdDSA algorithm
-        jwt.decode(token, public_key, algorithms=["EdDSA"])
-        logger.info("Token verified successfully")
-        return True
-    except InvalidTokenError as e:
-        logger.error(f"Invalid token error: {e}")
-        return False
-    except Exception as e:
-        logger.error(f"Unexpected error verifying token: {e}")
-        return False
+    # Check if already used
+    if invite.used_at:
+        return None
+    
+    # Check if active
+    if not invite.is_active:
+        return None
+    
+    # Check expiry
+    if invite.expires_at and invite.expires_at < datetime.utcnow():
+        return None
+    
+    return invite
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register(user: UserCreate, db: Session = Depends(get_db)):
-    # Verify invite token signature
-    if not verify_invite_token(user.invite_token):
+    # Validate invite code
+    invite = validate_invite_code(db, user.invite_token)
+    if not invite:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid invite token"
-        )
-    
-    # Check if invite token already used
-    existing_token = db.query(User).filter(User.invite_token == user.invite_token).first()
-    if existing_token:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invite token already used"
+            detail="Invalid or expired invite code"
         )
     
     # Check if user exists
@@ -126,11 +97,16 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
         email=user.email,
         hashed_password=hashed_password,
         name=user.name,
-        invite_token=user.invite_token
+        invite_code_id=invite.id
     )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+    
+    # Mark invite code as used
+    invite.used_at = datetime.utcnow()
+    db.add(invite)
+    db.commit()
     
     # Auto-create a family for the new user with unique santa code
     santa_code = generate_santa_code(db)
