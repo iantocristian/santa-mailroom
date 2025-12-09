@@ -1159,7 +1159,30 @@ body {
   font-size: 1.25rem;
 }
 
+/* Sidebar overlay - only visible on mobile when sidebar is open */
+.sidebar-overlay {
+  display: none;
+}
+
 @media (max-width: 768px) {
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 98;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    pointer-events: none;
+  }
+
+  .sidebar-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
   .mobile-menu-btn {
     display: block;
   }
