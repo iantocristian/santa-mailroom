@@ -9,6 +9,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.engine.reflection import Inspector
 
 
 # revision identifiers, used by Alembic.
@@ -19,29 +20,42 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create invite_codes table first (referenced by users)
-    op.create_table('invite_codes',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('code', sa.String(length=20), nullable=False),
-        sa.Column('note', sa.String(length=200), nullable=True),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-        sa.Column('used_at', sa.DateTime(timezone=True), nullable=True),
-        sa.Column('used_by_id', sa.Integer(), nullable=True),
-        sa.Column('expires_at', sa.DateTime(timezone=True), nullable=True),
-        sa.Column('is_active', sa.Boolean(), nullable=True),
-        sa.ForeignKeyConstraint(['used_by_id'], ['users.id'], ),
-        sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_invite_codes_code'), 'invite_codes', ['code'], unique=True)
-    op.create_index(op.f('ix_invite_codes_id'), 'invite_codes', ['id'], unique=False)
+    # Check if invite_codes table already exists
+    conn = op.get_bind()
+    inspector = Inspector.from_engine(conn)
+    existing_tables = inspector.get_table_names()
     
-    # Update users table
-    op.add_column('users', sa.Column('invite_code_id', sa.Integer(), nullable=True))
-    op.create_foreign_key('fk_users_invite_code', 'users', 'invite_codes', ['invite_code_id'], ['id'])
+    if 'invite_codes' not in existing_tables:
+        # Create invite_codes table first (referenced by users)
+        op.create_table('invite_codes',
+            sa.Column('id', sa.Integer(), nullable=False),
+            sa.Column('code', sa.String(length=20), nullable=False),
+            sa.Column('note', sa.String(length=200), nullable=True),
+            sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+            sa.Column('used_at', sa.DateTime(timezone=True), nullable=True),
+            sa.Column('used_by_id', sa.Integer(), nullable=True),
+            sa.Column('expires_at', sa.DateTime(timezone=True), nullable=True),
+            sa.Column('is_active', sa.Boolean(), nullable=True),
+            sa.ForeignKeyConstraint(['used_by_id'], ['users.id'], ),
+            sa.PrimaryKeyConstraint('id')
+        )
+        op.create_index(op.f('ix_invite_codes_code'), 'invite_codes', ['code'], unique=True)
+        op.create_index(op.f('ix_invite_codes_id'), 'invite_codes', ['id'], unique=False)
     
-    # Drop old invite_token column
-    op.drop_index(op.f('ix_users_invite_token'), table_name='users')
-    op.drop_column('users', 'invite_token')
+    # Check if users.invite_code_id column exists
+    columns = [c['name'] for c in inspector.get_columns('users')]
+    
+    if 'invite_code_id' not in columns:
+        op.add_column('users', sa.Column('invite_code_id', sa.Integer(), nullable=True))
+        op.create_foreign_key('fk_users_invite_code', 'users', 'invite_codes', ['invite_code_id'], ['id'])
+    
+    # Drop old invite_token column if exists
+    if 'invite_token' in columns:
+        # Check for index first
+        indexes = [i['name'] for i in inspector.get_indexes('users')]
+        if 'ix_users_invite_token' in indexes:
+            op.drop_index(op.f('ix_users_invite_token'), table_name='users')
+        op.drop_column('users', 'invite_token')
 
 
 def downgrade() -> None:

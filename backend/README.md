@@ -26,19 +26,37 @@ uvicorn app.main:app --reload
 python -m app.worker both
 ```
 
-## Invite CLI
+## Invite Codes
 
-Generate invite tokens for new parent accounts:
+Generate invite codes for new parent accounts (format: `SANTA-XK7M2P`):
 
 ```bash
-# Generate keypair
-python invite_cli.py generate-keys -o invite
+# Create a single invite code
+python invite_cli.py create
 
-# Add public key to .env
-# INVITE_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----"
+# Create multiple codes
+python invite_cli.py create --count 5
 
-# Create invite token
-python invite_cli.py create-token -k invite.key -n "Parent Name"
+# Create with a note and expiry
+python invite_cli.py create --note "For John's family" --expires 30
+
+# List active invite codes
+python invite_cli.py list
+
+# List all codes (including used)
+python invite_cli.py list --all
+
+# Revoke a code
+python invite_cli.py revoke SANTA-XK7M2P
+```
+
+**Docker usage:**
+```bash
+# Generate 5 invite codes
+docker compose exec backend python invite_cli.py create -c 5
+
+# List all codes
+docker compose exec backend python invite_cli.py list --all
 ```
 
 ## API Endpoints

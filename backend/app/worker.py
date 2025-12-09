@@ -111,13 +111,13 @@ import re
 def extract_family_code(to_email: str) -> Optional[str]:
     """Extract family code from plus-addressed email.
     
-    Expected format: santaclausgotmail+SnowPanda@gmail.com
-    Returns the word-based code (e.g., SnowPanda) or None if not found.
+    Expected format: santaclausgotmail+snowpanda@gmail.com
+    Returns the word-based code in lowercase (e.g., snowpanda) or None if not found.
     """
     if not to_email:
         return None
     # Match: anything+CODE@domain where CODE is 2+ word chars (letters)
-    match = re.match(r'^[^+]+\+([A-Za-z]{4,30})@', to_email)
+    match = re.match(r'^[^+]+\+([A-Za-z]{4,30})@', to_email.lower())
     return match.group(1) if match else None
 
 
@@ -148,8 +148,8 @@ def handle_fetch_emails(db: Session, payload: dict):
             logger.warning(f"Email without family code: {email_msg.to_email} from {email_msg.from_email}")
             continue
         
-        # Look up family by code
-        family = db.query(Family).filter(Family.santa_code == family_code).first()
+        # Look up family by code (case-insensitive)
+        family = db.query(Family).filter(Family.santa_code.ilike(family_code)).first()
         if not family:
             logger.warning(f"Invalid family code '{family_code}' from {email_msg.from_email}")
             continue

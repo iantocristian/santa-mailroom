@@ -183,26 +183,32 @@ class TestLoginSecurity:
 
 
 class TestInviteTokenSecurity:
-    """Test invite token security."""
+    """Test invite code security."""
     
-    def test_invite_token_cannot_be_reused(self, client: TestClient, db: Session, test_user: User):
-        """Invite tokens cannot be used twice.
+    def test_invite_code_cannot_be_reused(self, client: TestClient, db: Session, test_user: User):
+        """Invite codes cannot be used twice."""
+        from app.models import InviteCode
+        from datetime import datetime
         
-        Note: The signature is verified first, so fake tokens fail signature check
-        before the reuse check. This test verifies the token is rejected.
-        """
-        # test_user was already created with 'valid-invite-token-1'
-        # Try to register another user with the same token
+        # Create an invite code and mark it as used
+        used_invite = InviteCode(
+            code="SANTA-USED01",
+            used_at=datetime.utcnow()
+        )
+        db.add(used_invite)
+        db.commit()
+        
+        # Try to register with an already-used invite code
         response = client.post(
             "/api/auth/register",
             json={
                 "email": "newuser@test.com",
                 "password": "newpassword123",
                 "name": "New User",
-                "invite_token": test_user.invite_token
+                "invite_token": "SANTA-USED01"
             }
         )
-        # Token is rejected (either as invalid signature or already used)
+        # Code is rejected as invalid/used
         assert response.status_code == 400
     
     def test_invalid_invite_token_rejected(self, client: TestClient, db: Session):

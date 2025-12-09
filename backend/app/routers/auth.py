@@ -20,27 +20,27 @@ settings = get_settings()
 
 # Word lists for friendly family codes
 ADJECTIVES = [
-    "Snow", "Frost", "Jolly", "Merry", "Cozy", "Bright", "Sparkle", "Twinkle",
-    "Golden", "Silver", "Crystal", "Velvet", "Rosy", "Starry", "Candy", "Ginger",
-    "Holly", "Ivy", "Cocoa", "Maple", "Winter", "Arctic", "Nordic", "Alpine",
-    "Sugar", "Plum", "Cherry", "Mint", "Snowy"
+    "snow", "frost", "jolly", "merry", "cozy", "bright", "sparkle", "twinkle",
+    "golden", "silver", "crystal", "velvet", "rosy", "starry", "candy", "ginger",
+    "holly", "ivy", "cocoa", "maple", "winter", "arctic", "nordic", "alpine",
+    "sugar", "plum", "cherry", "mint", "snowy"
 ]
 
 ANIMALS = [
-    "Polar", "Owl", "Fox", "Bear", "Bunny", "Panda", "Koala", "Otter",
-    "Seal", "Husky", "Wolf", "Dove", "Robin", "Finch", "Swan", "Deer",
-    "Elk", "Moose", "Beaver", "Lynx", "Hare"
+    "polar", "owl", "fox", "bear", "bunny", "panda", "koala", "otter",
+    "seal", "husky", "wolf", "dove", "robin", "finch", "swan", "deer",
+    "elk", "moose", "beaver", "lynx", "hare"
 ]
 
 
 def generate_santa_code(db: Session) -> str:
-    """Generate a unique friendly word code for a family (e.g., SnowPanda)."""
+    """Generate a unique friendly word code for a family (e.g., snowpanda)."""
     while True:
         adjective = secrets.choice(ADJECTIVES)
         animal = secrets.choice(ANIMALS)
-        code = f"{adjective}{animal}"
-        # Check uniqueness
-        existing = db.query(Family).filter(Family.santa_code == code).first()
+        code = f"{adjective}{animal}"  # e.g., snowpanda
+        # Check uniqueness (case-insensitive)
+        existing = db.query(Family).filter(Family.santa_code.ilike(code)).first()
         if not existing:
             return code
 

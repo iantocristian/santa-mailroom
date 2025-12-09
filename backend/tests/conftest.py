@@ -12,7 +12,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.database import Base, get_db
 from app.main import app
-from app.models import User, Family, Child, Letter, WishItem, GoodDeed, SantaReply
+from app.models import User, Family, Child, Letter, WishItem, GoodDeed, SantaReply, InviteCode
 from app.auth import get_password_hash, create_access_token
 from app.services.email_service import EmailService
 
@@ -64,8 +64,7 @@ def test_user(db: Session) -> User:
     user = User(
         email="parent@test.com",
         hashed_password=get_password_hash("testpass123"),
-        name="Test Parent",
-        invite_token="valid-invite-token-1"
+        name="Test Parent"
     )
     db.add(user)
     db.commit()
@@ -92,8 +91,7 @@ def test_user_2(db: Session) -> User:
     user = User(
         email="parent2@test.com",
         hashed_password=get_password_hash("testpass456"),
-        name="Other Parent",
-        invite_token="valid-invite-token-2"
+        name="Other Parent"
     )
     db.add(user)
     db.commit()
