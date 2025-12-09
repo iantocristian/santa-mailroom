@@ -11,6 +11,7 @@ import Settings from './pages/Settings';
 import Wishlist from './pages/Wishlist';
 import Letters from './pages/Letters';
 import GoodDeeds from './pages/GoodDeeds';
+import Scrapbook from './pages/Scrapbook';
 import Sidebar from './components/Sidebar';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -144,7 +145,7 @@ function App() {
         element={
           <ProtectedRoute>
             <AppLayout>
-              <PlaceholderPage title="Scrapbook" icon="📖" />
+              <Scrapbook />
             </AppLayout>
           </ProtectedRoute>
         }
