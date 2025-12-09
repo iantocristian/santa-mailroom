@@ -368,11 +368,64 @@ def handle_send_reply(db: Session, payload: dict):
     db.commit()
 
 
+def handle_send_deed_email(db: Session, payload: dict):
+    """Send a Santa email about a new good deed."""
+    deed_id = payload.get("deed_id")
+    if not deed_id:
+        raise ValueError("Missing deed_id in payload")
+    
+    logger.info(f"Sending deed notification for deed {deed_id}")
+    
+    deed = db.query(GoodDeed).filter(GoodDeed.id == deed_id).first()
+    if not deed:
+        raise ValueError(f"Deed {deed_id} not found")
+    
+    child = db.query(Child).filter(Child.id == deed.child_id).first()
+    if not child:
+        raise ValueError(f"Child {deed.child_id} not found")
+    
+    # Get child's last letter to find their email
+    last_letter = db.query(Letter).filter(
+        Letter.child_id == child.id
+    ).order_by(Letter.received_at.desc()).first()
+    
+    if not last_letter or not last_letter.from_email:
+        logger.warning(f"No email found for child {child.id}, cannot send deed notification")
+        return
+    
+    # Generate email content
+    gpt_service = get_gpt_service()
+    child_age = None
+    if child.birth_year:
+        child_age = datetime.utcnow().year - child.birth_year
+    
+    email_body = gpt_service.generate_deed_email(
+        child_name=child.name,
+        child_age=child_age,
+        deed_description=deed.description
+    )
+    
+    # Send email
+    email_service = get_email_service()
+    success = email_service.send_santa_reply(
+        to_email=last_letter.from_email,
+        to_name=child.name,
+        subject="A Special Message from Santa! 🎅",
+        body_text=email_body
+    )
+    
+    if success:
+        logger.info(f"Deed notification sent to {child.name}")
+    else:
+        raise Exception("Failed to send deed notification email")
+
+
 # Task handler registry
 TASK_HANDLERS = {
     "fetch_emails": handle_fetch_emails,
     "process_letter": handle_process_letter,
     "send_reply": handle_send_reply,
+    "send_deed_email": handle_send_deed_email,
 }
 
 

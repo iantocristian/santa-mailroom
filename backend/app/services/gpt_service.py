@@ -313,6 +313,57 @@ Write a magical reply from Santa!"""
         except Exception as e:
             logger.error(f"Error generating Santa reply: {e}")
             return f"Ho ho ho, dear {child_name}! Santa received your wonderful letter and was so happy to hear from you! Keep being good and remember that the magic of Christmas is all about love and kindness. 🎅", None
+    
+    def generate_deed_email(
+        self,
+        child_name: str,
+        child_age: Optional[int],
+        deed_description: str
+    ) -> str:
+        """
+        Generate a special email from Santa about a new good deed.
+        
+        Args:
+            child_name: Child's first name
+            child_age: Child's age (if known)
+            deed_description: The good deed to do
+            
+        Returns:
+            Email body text
+        """
+        age_context = f"The child is approximately {child_age} years old." if child_age else "Age unknown."
+        
+        system_prompt = f"""You are Santa Claus, writing a short, magical email to a child about a special good deed you'd like them to do.
+
+Guidelines:
+- Be warm, jolly, and magical
+- Use the child's name naturally
+- Keep it SHORT - 2-3 paragraphs max
+- Make the child excited about doing the deed
+- Don't mention Christmas presents directly - focus on the joy of helping others
+- End with encouragement
+
+{age_context}"""
+
+        user_prompt = f"""Child's name: {child_name}
+
+Good deed to suggest: {deed_description}
+
+Write a short, magical email from Santa about this good deed!"""
+
+        try:
+            response = self._chat(
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                model=self.model
+            )
+            return response
+            
+        except Exception as e:
+            logger.error(f"Error generating deed email: {e}")
+            return f"Ho ho ho, {child_name}!\n\nSanta has a very special request for you! I'd love it if you could: {deed_description}\n\nThis would make Santa so proud! Remember, every act of kindness makes the world a little brighter.\n\nWith love,\n🎅 Santa Claus"
 
 
 # Singleton instance

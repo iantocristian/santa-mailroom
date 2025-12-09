@@ -7,6 +7,7 @@ from app.database import get_db
 from app.auth import get_current_user
 from app.models import User, GoodDeed, Child
 from app.schemas import GoodDeedCreate, GoodDeedUpdate, GoodDeedResponse, GoodDeedWithChild
+from app.job_queue import Job
 
 router = APIRouter(prefix="/api/deeds", tags=["good-deeds"])
 
@@ -63,6 +64,7 @@ def list_good_deeds(
 @router.post("", response_model=GoodDeedResponse, status_code=status.HTTP_201_CREATED)
 def create_good_deed(
     deed_data: GoodDeedCreate,
+    send_email: bool = Query(True, description="Send notification email to child"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -83,6 +85,16 @@ def create_good_deed(
     db.add(deed)
     db.commit()
     db.refresh(deed)
+    
+    # Queue email notification if requested
+    if send_email:
+        job = Job(
+            task_type="send_deed_email",
+            payload={"deed_id": deed.id},
+            priority=1
+        )
+        db.add(job)
+        db.commit()
     
     return deed
 

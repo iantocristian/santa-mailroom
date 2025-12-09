@@ -10,6 +10,7 @@ import Children from './pages/Children';
 import Settings from './pages/Settings';
 import Wishlist from './pages/Wishlist';
 import Letters from './pages/Letters';
+import GoodDeeds from './pages/GoodDeeds';
 import Sidebar from './components/Sidebar';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -153,7 +154,7 @@ function App() {
         element={
           <ProtectedRoute>
             <AppLayout>
-              <PlaceholderPage title="Good Deeds" icon="⭐" />
+              <GoodDeeds />
             </AppLayout>
           </ProtectedRoute>
         }
