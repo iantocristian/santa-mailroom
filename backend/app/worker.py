@@ -387,6 +387,10 @@ def handle_send_reply(db: Session, payload: dict):
     if not letter or not child or not letter.from_email:
         raise ValueError(f"Missing data for reply {reply_id}")
     
+    # Get family code for Reply-To header
+    family = db.query(Family).filter(Family.id == child.family_id).first()
+    family_code = family.code if family else None
+    
     # Safety check before sending (if enabled)
     if settings.email_safety_check_enabled:
         is_safe, safety_reason = gpt_service.check_email_safety(
@@ -413,7 +417,8 @@ def handle_send_reply(db: Session, payload: dict):
             body_text=reply.body_text,
             body_html=reply.body_html,
             images_used=images_used,
-            in_reply_to=letter.message_id
+            in_reply_to=letter.message_id,
+            family_code=family_code
         )
     else:
         # Fallback to simple email
@@ -423,7 +428,8 @@ def handle_send_reply(db: Session, payload: dict):
             subject=f"Re: {letter.subject or 'Your letter to Santa'}",
             body_text=reply.body_text,
             body_html=reply.body_html,
-            in_reply_to=letter.message_id
+            in_reply_to=letter.message_id,
+            family_code=family_code
         )
     
     if success:
@@ -466,6 +472,10 @@ def handle_send_deed_email(db: Session, payload: dict):
     child = db.query(Child).filter(Child.id == deed.child_id).first()
     if not child:
         raise ValueError(f"Child {deed.child_id} not found")
+    
+    # Get family code for Reply-To header
+    family = db.query(Family).filter(Family.id == child.family_id).first()
+    family_code = family.code if family else None
     
     # Get child's last letter to find their email
     last_letter = db.query(Letter).filter(
@@ -522,14 +532,16 @@ def handle_send_deed_email(db: Session, payload: dict):
             subject="⭐ A Special Mission from Santa! 🎅",
             body_text=rich_email["text_body"],
             body_html=rich_email["html_body"],
-            images_used=rich_email["images_used"]
+            images_used=rich_email["images_used"],
+            family_code=family_code
         )
     else:
         success = email_service.send_santa_reply(
             to_email=last_letter.from_email,
             to_name=child.name,
             subject="⭐ A Special Mission from Santa! 🎅",
-            body_text=rich_email["text_body"]
+            body_text=rich_email["text_body"],
+            family_code=family_code
         )
     
     if success:
@@ -565,6 +577,10 @@ def handle_send_deed_congrats(db: Session, payload: dict):
     child = db.query(Child).filter(Child.id == deed.child_id).first()
     if not child:
         raise ValueError(f"Child {deed.child_id} not found")
+    
+    # Get family code for Reply-To header
+    family = db.query(Family).filter(Family.id == child.family_id).first()
+    family_code = family.code if family else None
     
     # Get child's last letter to find their email
     last_letter = db.query(Letter).filter(
@@ -622,14 +638,16 @@ def handle_send_deed_congrats(db: Session, payload: dict):
             subject="🎉⭐ Santa is SO PROUD of You! ⭐🎉",
             body_text=rich_email["text_body"],
             body_html=rich_email["html_body"],
-            images_used=rich_email["images_used"]
+            images_used=rich_email["images_used"],
+            family_code=family_code
         )
     else:
         success = email_service.send_santa_reply(
             to_email=last_letter.from_email,
             to_name=child.name,
             subject="🎉⭐ Santa is SO PROUD of You! ⭐🎉",
-            body_text=rich_email["text_body"]
+            body_text=rich_email["text_body"],
+            family_code=family_code
         )
     
     if success:

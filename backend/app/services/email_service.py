@@ -185,7 +185,8 @@ class EmailService:
         subject: str,
         body_text: str,
         body_html: Optional[str] = None,
-        in_reply_to: Optional[str] = None
+        in_reply_to: Optional[str] = None,
+        family_code: Optional[str] = None
     ) -> bool:
         """
         Send an email reply from Santa.
@@ -197,6 +198,7 @@ class EmailService:
             body_text: Plain text body
             body_html: Optional HTML body
             in_reply_to: Optional Message-ID to reply to
+            family_code: Optional family code for Reply-To header
             
         Returns:
             True if sent successfully, False otherwise.
@@ -221,6 +223,14 @@ class EmailService:
             msg["From"] = formataddr((self.santa_name, self.santa_email))
             msg["To"] = formataddr((to_name or "", to_email))
             msg["Subject"] = subject
+            
+            # Set Reply-To with family code for proper routing
+            if family_code:
+                # Use plus addressing: santa+familycode@gmail.com
+                base_email, domain = self.santa_email.split("@")
+                reply_to_email = f"{base_email}+{family_code}@{domain}"
+                msg["Reply-To"] = formataddr((self.santa_name, reply_to_email))
+                logger.info(f"Reply-To set to: {reply_to_email}")
             
             if in_reply_to:
                 msg["In-Reply-To"] = in_reply_to
@@ -264,7 +274,8 @@ class EmailService:
         body_text: str,
         body_html: str,
         images_used: List[str],
-        in_reply_to: Optional[str] = None
+        in_reply_to: Optional[str] = None,
+        family_code: Optional[str] = None
     ) -> bool:
         """
         Send a rich HTML email with embedded CID images.
@@ -277,6 +288,7 @@ class EmailService:
             body_html: HTML body with cid: image references
             images_used: List of CID names (e.g., ["santa_sleigh", "elf_letter"])
             in_reply_to: Optional Message-ID to reply to
+            family_code: Optional family code for Reply-To header
             
         Returns:
             True if sent successfully, False otherwise.
@@ -296,6 +308,13 @@ class EmailService:
             msg_root["From"] = formataddr((self.santa_name, self.santa_email))
             msg_root["To"] = formataddr((to_name or "", to_email))
             msg_root["Subject"] = subject
+            
+            # Set Reply-To with family code for proper routing
+            if family_code:
+                base_email, domain = self.santa_email.split("@")
+                reply_to_email = f"{base_email}+{family_code}@{domain}"
+                msg_root["Reply-To"] = formataddr((self.santa_name, reply_to_email))
+                logger.info(f"Reply-To set to: {reply_to_email}")
             
             if in_reply_to:
                 msg_root["In-Reply-To"] = in_reply_to
