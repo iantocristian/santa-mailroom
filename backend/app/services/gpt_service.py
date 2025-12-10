@@ -396,29 +396,66 @@ MANDATORY IMAGES (must include these):
 
 {image_catalog}
 
-CRITICAL HTML STRUCTURE RULES:
+CRITICAL STYLING RULES (make it visually rich with LOTS OF EMOJIS!):
+
+1. GREETING (red, italic, with heart emoji):
+   <td style="padding: 20px 30px; font-size: 24px; font-style: italic; color: #c00000;">
+       Dear [Name], ❤️✨
+   </td>
+
+2. SECTION HEADINGS (use emojis liberally!):
+   - "🎄 Your Letter Arrived! 🎄" or "❄️ News from the Workshop! ❄️"
+   - "🦌 The Reindeer Are Ready! 🦌" or "⭐ You're On the Nice List! ⭐"
+   - Style: color: #c00000; font-size: 20-22px; font-weight: bold;
+
+3. GOOD DEED HEADING (red, italic, with star emojis):
+   <h2 style="margin: 0; color: #c00000; font-family: Georgia, serif; font-size: 28px; font-style: italic; text-align: center;">
+       ⭐ A Very Important Job For You! ⭐
+   </h2>
+
+4. CLOSING MESSAGE (red, bold, larger):
+   <p style="font-size: 22px; color: #c00000; font-weight: bold;">
+       Merry Christmas, little friend! ☃️❤️🎄
+   </p>
+
+5. SIGNATURE (brown, italic, elegant):
+   <p style="font-size: 24px; font-style: italic; color: #5a3a22; line-height: 1.4;">
+       Love from the North Pole,<br>
+       Santa & The Elves 🎅🧝‍♂️🧝‍♀️🦌❤️
+   </p>
+
+6. BODY TEXT with emojis: 
+   - Sprinkle emojis throughout paragraphs: ✨ ❄️ 🎁 ⭐ 🦌 🎄 ❤️ 🛷 ☃️ 🍪 🥛
+   - End sentences with relevant emojis
+   - font-size: 16-18px, line-height: 1.5-1.6, color: #5a3a22
+
+EMOJI USAGE GUIDE (use these generously!):
+🎅 Santa | 🎄 Christmas tree | ❄️ Snowflake | ⭐ Star | ✨ Sparkle
+🦌 Reindeer | 🛷 Sleigh | 🎁 Present | ❤️ Heart | 🧝‍♂️🧝‍♀️ Elves
+☃️ Snowman | 🍪 Cookie | 🥛 Milk | 🔔 Bell | 🌟 Glowing star
+
+HTML STRUCTURE RULES:
 1. Use table-based layout for email compatibility (no div, no CSS flexbox/grid)
 2. Images must use src="cid:NAME" format (e.g., src="cid:santa_sleigh")
 3. Use inline styles only (style="...")
 4. Keep width max 600px for main content, center align
-5. Use Georgia or serif fonts
-6. Colors: #c00000 (Santa red), #5a3a22 (warm brown), #FFF8DC (cream background)
-7. Wrap everything in a table with background-color: #FFF8DC and border: 1px solid #d4af37
+5. Wrap everything in a table with background-color: #FFF8DC and border: 1px solid #d4af37
+6. Place images next to text in table cells for visual interest
 
 PLAIN TEXT VERSION:
-- Include festive emojis: 🎅 🎄 ❄️ 🎁 ⭐ 🦌 🛷 ❤️ ✨
-- Make it warm and readable without HTML
-- Keep the same magical content
+- Use LOTS of emojis: 🎅 🎄 ❄️ 🎁 ⭐ 🦌 🛷 ❤️ ✨ ☃️ 🧝‍♂️🧝‍♀️
+- Start each paragraph or section with emojis
+- Make it warm, festive, and readable
 
 Respond with JSON in this exact format:
 {{
-    "html_body": "<table>...complete HTML email content with mandatory header/footer images...</table>",
-    "text_body": "🎅 Ho ho ho! Plain text version with emojis... 🎄",
+    "html_body": "<table>...complete HTML with rich styling and LOTS of emojis...</table>",
+    "text_body": "🎅❄️ Ho ho ho! Festive text with many emojis... 🎄✨",
     "suggested_deed": "One specific good deed suggestion",
     "images_used": ["santa_sleigh", "elves_bell", "other_cid_1", "other_cid_2"]
 }}
 
-Make each email unique and magical! Vary the structure, image placement, and writing style."""
+Make each email VISUALLY STUNNING with rich styling AND lots of festive emojis! 🎄✨"""
 
         user_prompt = f"""Create a magical email for {child_name}!
 
@@ -470,17 +507,18 @@ I was so happy to read what you wrote. My elves and I are working hard in our wo
 
 Remember to be kind to others and spread joy wherever you go. That's the true magic of Christmas! ⭐
 
-🎁 Keep being the wonderful person you are! 🎁
+⭐ A Very Important Job For You! ⭐
+Do something kind for someone today! It could be helping a family member, sharing with a friend, or giving someone a compliment. These little acts of kindness make Santa's heart so happy! 🎁
+
+❤️ Merry Christmas, little friend! ❤️
 
 With love from the North Pole,
-🎅 Santa Claus & The Elves 🧝‍♂️🧝‍♀️
+🎅 Santa Claus & The Elves 🧝‍♂️🧝‍♀️"""
 
-❤️ Merry Christmas! ❤️"""
-
-        # Static HTML with mandatory images
+        # Static HTML with mandatory images and rich styling
         html_body = f"""<table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #FFF8DC; border: 1px solid #d4af37; font-family: Georgia, 'Times New Roman', serif; color: #5a3a22;">
     <tr>
-        <td align="center" style="padding: 0;">
+        <td align="center" style="padding: 10px 0;">
             <img src="cid:santa_sleigh" width="404" height="178" alt="Santa's Sleigh" style="display: block;" />
         </td>
     </tr>
@@ -494,7 +532,18 @@ With love from the North Pole,
             <p>Your wonderful letter has arrived at the North Pole! ❄️</p>
             <p>I was so happy to read what you wrote. My elves and I are working hard in our workshop, and the reindeer are practicing their flying for the big night! 🦌✨</p>
             <p>Remember to be kind to others and spread joy wherever you go. That's the true magic of Christmas! ⭐</p>
-            <p style="font-weight: bold; color: #c00000;">Keep being the wonderful person you are! 🎁</p>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding: 20px 30px;">
+            <h2 style="margin: 0; color: #c00000; font-family: Georgia, serif; font-size: 28px; font-style: italic; text-align: center;">
+                ⭐ A Very Important Job For You! ⭐
+            </h2>
+        </td>
+    </tr>
+    <tr>
+        <td align="left" style="padding: 10px 30px 20px 30px; font-size: 18px; line-height: 1.5;">
+            Do something kind for someone today! It could be helping a family member, sharing with a friend, or giving someone a compliment. These little acts of kindness make Santa's heart so happy! 🎁
         </td>
     </tr>
     <tr>
@@ -503,9 +552,14 @@ With love from the North Pole,
         </td>
     </tr>
     <tr>
-        <td align="center" style="padding: 20px 30px; font-size: 20px; font-style: italic; color: #c00000;">
-            With love from the North Pole,<br/>
-            <span style="font-size: 28px;">🎅 Santa Claus</span>
+        <td align="center" style="padding: 10px 30px;">
+            <p style="font-size: 22px; color: #c00000; font-weight: bold; margin-bottom: 15px;">
+                Merry Christmas, little friend! ☃️❤️
+            </p>
+            <p style="font-size: 24px; font-style: italic; color: #5a3a22; line-height: 1.4; margin: 0;">
+                Love from the North Pole,<br>
+                Santa & The Elves 🎅🧝‍♂️🧝‍♀️
+            </p>
         </td>
     </tr>
 </table>"""
