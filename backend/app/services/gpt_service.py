@@ -576,9 +576,9 @@ With love from the North Pole,
         child_name: str,
         child_age: Optional[int],
         deed_description: str
-    ) -> str:
+    ) -> dict:
         """
-        Generate a special email from Santa about a new good deed.
+        Generate a special rich HTML email from Santa about a new good deed.
         
         Args:
             child_name: Child's first name
@@ -586,27 +586,60 @@ With love from the North Pole,
             deed_description: The good deed to do
             
         Returns:
-            Email body text
+            Dict with html_body, text_body, images_used
         """
-        age_context = f"The child is approximately {child_age} years old." if child_age else "Age unknown."
+        from app.email_templates.image_catalog import get_catalog_for_gpt
         
-        system_prompt = f"""You are Santa Claus, writing a short, magical email to a child about a special good deed you'd like them to do.
+        age_context = f"The child is approximately {child_age} years old." if child_age else "Age unknown."
+        image_catalog = get_catalog_for_gpt()
+        
+        system_prompt = f"""You are Santa Claus, writing a magical HTML email to a child about a special good deed!
 
 Guidelines:
-- Be warm, jolly, and magical
+- Be warm, jolly, and magical with LOTS OF EMOJIS! 🎅❤️✨
 - Use the child's name naturally
 - Keep it SHORT - 2-3 paragraphs max
 - Make the child excited about doing the deed
 - Don't mention Christmas presents directly - focus on the joy of helping others
-- End with encouragement
 
-{age_context}"""
+{age_context}
+
+MANDATORY IMAGES:
+- Use cid:santa_sleigh (404x178) as header
+- Use cid:elf_announcing (139x215) or another appropriate elf image in the body
+- Use cid:elves_bell (258x193) near closing
+
+{image_catalog}
+
+STYLING (same as Santa replies):
+1. GREETING: style="font-size: 24px; font-style: italic; color: #c00000;"
+   "Dear [Name], ❤️✨"
+
+2. DEED HEADING: style="color: #c00000; font-size: 28px; font-style: italic;"
+   "⭐ Santa Has a Special Mission For You! ⭐"
+
+3. CLOSING: style="font-size: 22px; color: #c00000; font-weight: bold;"
+   "You can do it! I believe in you! 🌟❤️"
+
+4. SIGNATURE: style="font-size: 24px; font-style: italic; color: #5a3a22;"
+   "With love and jingle bells, Santa 🎅🔔✨"
+
+5. USE EMOJIS EVERYWHERE: ⭐ ❤️ ✨ 🎅 🎄 🦌 🧝‍♂️ 🎁 ☃️ 🌟
+
+HTML: Use table-based layout, max 600px width, background #FFF8DC, border: 1px solid #d4af37
+
+Respond with JSON:
+{{
+    "html_body": "<table>...rich HTML with images and emojis...</table>",
+    "text_body": "🎅✨ Emoji-rich plain text version... ❤️🎄",
+    "images_used": ["santa_sleigh", "elf_announcing", "elves_bell"]
+}}"""
 
         user_prompt = f"""Child's name: {child_name}
 
 Good deed to suggest: {deed_description}
 
-Write a short, magical email from Santa about this good deed!"""
+Write a magical, visually rich email from Santa about this good deed! Include images and lots of emojis!"""
 
         try:
             response = self._chat(
@@ -614,13 +647,33 @@ Write a short, magical email from Santa about this good deed!"""
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
-                model=self.model
+                model=self.model,
+                response_format={"type": "json_object"}
             )
-            return response
+            
+            import json
+            data = json.loads(response)
+            
+            # Ensure mandatory images
+            images = data.get("images_used", [])
+            if "santa_sleigh" not in images:
+                images.append("santa_sleigh")
+            if "elves_bell" not in images:
+                images.append("elves_bell")
+            
+            return {
+                "html_body": data.get("html_body", ""),
+                "text_body": data.get("text_body", f"🎅 Ho ho ho, {child_name}! Santa has a special mission for you! ✨"),
+                "images_used": images
+            }
             
         except Exception as e:
             logger.error(f"Error generating deed email: {e}")
-            return f"Ho ho ho, {child_name}!\n\nSanta has a very special request for you! I'd love it if you could: {deed_description}\n\nThis would make Santa so proud! Remember, every act of kindness makes the world a little brighter.\n\nWith love,\n🎅 Santa Claus"
+            return {
+                "html_body": "",
+                "text_body": f"🎅❤️ Ho ho ho, {child_name}! ❤️🎅\n\n⭐ Santa has a very special mission for you! ⭐\n\n{deed_description}\n\n✨ This would make Santa so proud! Remember, every act of kindness makes the world a little brighter and spreads Christmas magic! 🎄❤️\n\n🌟 You can do it! I believe in you! 🌟\n\nWith love and jingle bells,\n🎅 Santa Claus 🔔✨",
+                "images_used": ["santa_sleigh", "elves_bell"]
+            }
     
     def generate_deed_congrats_email(
         self,
@@ -628,9 +681,9 @@ Write a short, magical email from Santa about this good deed!"""
         child_age: Optional[int],
         deed_description: str,
         parent_note: Optional[str] = None
-    ) -> str:
+    ) -> dict:
         """
-        Generate a congratulations email from Santa for completing a good deed.
+        Generate a rich HTML congratulations email from Santa for completing a good deed.
         
         Args:
             child_name: Child's first name
@@ -639,31 +692,68 @@ Write a short, magical email from Santa about this good deed!"""
             parent_note: Optional parent's note about how it went
             
         Returns:
-            Email body text
+            Dict with html_body, text_body, images_used
         """
+        from app.email_templates.image_catalog import get_catalog_for_gpt
+        
         age_context = f"The child is approximately {child_age} years old." if child_age else "Age unknown."
+        image_catalog = get_catalog_for_gpt()
         
         note_context = ""
         if parent_note:
             note_context = f"\n\nNote from parent about how it went: {parent_note}"
         
-        system_prompt = f"""You are Santa Claus, writing a short, celebratory email to a child who just completed a good deed!
+        system_prompt = f"""You are Santa Claus, writing a CELEBRATORY HTML email to a child who completed a good deed!
 
 Guidelines:
-- Be VERY excited and proud!
+- Be VERY excited and proud with LOTS OF EMOJIS! 🎉🎅❤️✨⭐
 - Use the child's name naturally
 - Keep it SHORT - 2-3 paragraphs max
-- Specifically mention what they did
+- Specifically mention what they did and celebrate it!
 - Make them feel special and proud
-- End with encouragement to keep being kind
+- This is a CELEBRATION email - make it feel like a party!
 
-{age_context}"""
+{age_context}
+
+MANDATORY IMAGES:
+- Use cid:santa_sleigh (404x178) as header
+- Use cid:elves_bell (258x193) - celebrating elves for congratulations!
+- Use cid:nice_list_green (138x140) or cid:nice_list_red (137x138) to show they're on the nice list!
+
+{image_catalog}
+
+STYLING (celebratory theme!):
+1. GREETING: style="font-size: 24px; font-style: italic; color: #c00000;"
+   "Dear [Name], 🌟❤️✨"
+
+2. CELEBRATION HEADING: style="color: #c00000; font-size: 28px; font-style: italic;"
+   "🎉⭐ YOU DID IT! AMAZING! ⭐🎉" or "🎉✨ WONDERFUL NEWS! ✨🎉"
+
+3. NICE LIST MESSAGE: style="font-size: 20px; color: #c00000; font-weight: bold;"
+   "⭐ You're definitely on the Nice List! ⭐" 
+
+4. CLOSING: style="font-size: 22px; color: #c00000; font-weight: bold;"
+   "Santa is SO PROUD of you! 🎅❤️🌟"
+
+5. SIGNATURE: style="font-size: 24px; font-style: italic; color: #5a3a22;"
+   "With proud jingle bells, Santa 🎅🔔✨❤️"
+
+6. USE CELEBRATION EMOJIS: 🎉 ⭐ ❤️ ✨ 🎅 🎄 🌟 🏆 👏 🥳 💫
+
+HTML: Use table-based layout, max 600px width, background #FFF8DC, border: 1px solid #d4af37
+
+Respond with JSON:
+{{
+    "html_body": "<table>...celebratory HTML with images and emojis...</table>",
+    "text_body": "🎉🎅 WONDERFUL NEWS! Celebratory text with emojis... ⭐❤️",
+    "images_used": ["santa_sleigh", "elves_bell", "nice_list_green"]
+}}"""
 
         user_prompt = f"""Child's name: {child_name}
 
 Good deed they completed: {deed_description}{note_context}
 
-Write a SHORT, celebratory email from Santa congratulating them!"""
+Write a CELEBRATORY email from Santa congratulating them with lots of excitement and emojis!"""
 
         try:
             response = self._chat(
@@ -671,13 +761,33 @@ Write a SHORT, celebratory email from Santa congratulating them!"""
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
-                model=self.model
+                model=self.model,
+                response_format={"type": "json_object"}
             )
-            return response
+            
+            import json
+            data = json.loads(response)
+            
+            # Ensure mandatory images
+            images = data.get("images_used", [])
+            if "santa_sleigh" not in images:
+                images.append("santa_sleigh")
+            if "elves_bell" not in images:
+                images.append("elves_bell")
+            
+            return {
+                "html_body": data.get("html_body", ""),
+                "text_body": data.get("text_body", f"🎉 Ho ho ho, {child_name}! You did it! 🌟"),
+                "images_used": images
+            }
             
         except Exception as e:
             logger.error(f"Error generating congrats email: {e}")
-            return f"Ho ho ho, {child_name}!\n\n🎉 WONDERFUL NEWS! 🎉\n\nSanta just heard that you completed your good deed: {deed_description}\n\nI am SO PROUD of you! This is exactly the kind of kindness that makes Christmas magic real. You've made Santa's heart very happy today!\n\nKeep being the amazing person you are!\n\nWith extra jingle bells,\n🎅 Santa Claus"
+            return {
+                "html_body": "",
+                "text_body": f"🎅🎉 Ho ho ho, {child_name}! 🎉🎅\n\n⭐✨ WONDERFUL NEWS! ✨⭐\n\nSanta just heard that you completed your good deed: {deed_description}\n\n🌟 I am SO PROUD of you! 🌟\n\nThis is exactly the kind of kindness that makes Christmas magic real! You've made Santa's heart very happy today! ❤️🎄\n\n⭐ You're definitely on the Nice List! ⭐\n\nKeep being the amazing person you are! 🎁✨\n\nWith proud jingle bells,\n🎅 Santa Claus 🔔❤️✨",
+                "images_used": ["santa_sleigh", "elves_bell"]
+            }
     
     def check_email_safety(
         self,

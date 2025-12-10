@@ -476,13 +476,13 @@ def handle_send_deed_email(db: Session, payload: dict):
         logger.warning(f"No email found for child {child.id}, cannot send deed notification")
         return
     
-    # Generate email content
+    # Generate rich email content
     gpt_service = get_gpt_service()
     child_age = None
     if child.birth_year:
         child_age = datetime.utcnow().year - child.birth_year
     
-    email_body = gpt_service.generate_deed_email(
+    rich_email = gpt_service.generate_deed_email(
         child_name=child.name,
         child_age=child_age,
         deed_description=deed.description
@@ -491,7 +491,7 @@ def handle_send_deed_email(db: Session, payload: dict):
     # Safety check before sending (if enabled)
     if settings.email_safety_check_enabled:
         is_safe, safety_reason = gpt_service.check_email_safety(
-            email_content=email_body,
+            email_content=rich_email["text_body"],
             child_name=child.name,
             email_type="deed_email"
         )
@@ -502,8 +502,8 @@ def handle_send_deed_email(db: Session, payload: dict):
             sent_email = SentEmail(
                 child_id=child.id,
                 email_type="deed_suggestion",
-                subject="A Special Message from Santa! 🎅",
-                body_text=email_body,
+                subject="⭐ A Special Mission from Santa! 🎅",
+                body_text=rich_email["text_body"],
                 deed_id=deed.id,
                 delivery_status="blocked"
             )
@@ -513,24 +513,34 @@ def handle_send_deed_email(db: Session, payload: dict):
         
         logger.info(f"Safety check PASSED for deed email {deed_id}")
     
-    # Send email
+    # Send rich email with images
     email_service = get_email_service()
-    success = email_service.send_santa_reply(
-        to_email=last_letter.from_email,
-        to_name=child.name,
-        subject="A Special Message from Santa! 🎅",
-        body_text=email_body
-    )
+    if rich_email["html_body"] and rich_email["images_used"]:
+        success = email_service.send_rich_email(
+            to_email=last_letter.from_email,
+            to_name=child.name,
+            subject="⭐ A Special Mission from Santa! 🎅",
+            body_text=rich_email["text_body"],
+            body_html=rich_email["html_body"],
+            images_used=rich_email["images_used"]
+        )
+    else:
+        success = email_service.send_santa_reply(
+            to_email=last_letter.from_email,
+            to_name=child.name,
+            subject="⭐ A Special Mission from Santa! 🎅",
+            body_text=rich_email["text_body"]
+        )
     
     if success:
-        logger.info(f"Deed notification sent to {child.name}")
+        logger.info(f"Deed notification sent to {child.name} with {len(rich_email['images_used'])} images")
         
         # Record sent email
         sent_email = SentEmail(
             child_id=child.id,
             email_type="deed_suggestion",
-            subject="A Special Message from Santa! 🎅",
-            body_text=email_body,
+            subject="⭐ A Special Mission from Santa! 🎅",
+            body_text=rich_email["text_body"],
             deed_id=deed.id,
             delivery_status="sent"
         )
@@ -565,13 +575,13 @@ def handle_send_deed_congrats(db: Session, payload: dict):
         logger.warning(f"No email found for child {child.id}, cannot send congrats")
         return
     
-    # Generate congratulations email
+    # Generate rich congratulations email
     gpt_service = get_gpt_service()
     child_age = None
     if child.birth_year:
         child_age = datetime.utcnow().year - child.birth_year
     
-    email_body = gpt_service.generate_deed_congrats_email(
+    rich_email = gpt_service.generate_deed_congrats_email(
         child_name=child.name,
         child_age=child_age,
         deed_description=deed.description,
@@ -581,7 +591,7 @@ def handle_send_deed_congrats(db: Session, payload: dict):
     # Safety check before sending (if enabled)
     if settings.email_safety_check_enabled:
         is_safe, safety_reason = gpt_service.check_email_safety(
-            email_content=email_body,
+            email_content=rich_email["text_body"],
             child_name=child.name,
             email_type="deed_congrats"
         )
@@ -592,8 +602,8 @@ def handle_send_deed_congrats(db: Session, payload: dict):
             sent_email = SentEmail(
                 child_id=child.id,
                 email_type="deed_congrats",
-                subject="🎉 Santa is SO PROUD of You! 🎉",
-                body_text=email_body,
+                subject="🎉⭐ Santa is SO PROUD of You! ⭐🎉",
+                body_text=rich_email["text_body"],
                 deed_id=deed.id,
                 delivery_status="blocked"
             )
@@ -603,24 +613,34 @@ def handle_send_deed_congrats(db: Session, payload: dict):
         
         logger.info(f"Safety check PASSED for deed congrats {deed_id}")
     
-    # Send email
+    # Send rich email with images
     email_service = get_email_service()
-    success = email_service.send_santa_reply(
-        to_email=last_letter.from_email,
-        to_name=child.name,
-        subject="🎉 Santa is SO PROUD of You! 🎉",
-        body_text=email_body
-    )
+    if rich_email["html_body"] and rich_email["images_used"]:
+        success = email_service.send_rich_email(
+            to_email=last_letter.from_email,
+            to_name=child.name,
+            subject="🎉⭐ Santa is SO PROUD of You! ⭐🎉",
+            body_text=rich_email["text_body"],
+            body_html=rich_email["html_body"],
+            images_used=rich_email["images_used"]
+        )
+    else:
+        success = email_service.send_santa_reply(
+            to_email=last_letter.from_email,
+            to_name=child.name,
+            subject="🎉⭐ Santa is SO PROUD of You! ⭐🎉",
+            body_text=rich_email["text_body"]
+        )
     
     if success:
-        logger.info(f"Deed congratulations sent to {child.name}")
+        logger.info(f"Deed congratulations sent to {child.name} with {len(rich_email['images_used'])} images")
         
         # Record sent email
         sent_email = SentEmail(
             child_id=child.id,
             email_type="deed_congrats",
-            subject="🎉 Santa is SO PROUD of You! 🎉",
-            body_text=email_body,
+            subject="🎉⭐ Santa is SO PROUD of You! ⭐🎉",
+            body_text=rich_email["text_body"],
             deed_id=deed.id,
             delivery_status="sent"
         )
