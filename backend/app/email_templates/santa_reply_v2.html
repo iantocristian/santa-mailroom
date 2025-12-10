@@ -1,0 +1,183 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A Letter from Santa</title>
+    <style type="text/css">
+        /* Client-specific resets */
+        body,
+        table,
+        td,
+        a {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        table,
+        td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+
+        img {
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+            display: block;
+        }
+
+        table {
+            border-collapse: collapse !important;
+        }
+
+        body {
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
+
+        /* iOS BLUE LINK REMOVAL */
+        a[x-apple-data-detectors] {
+            color: inherit !important;
+            text-decoration: none !important;
+            font-size: inherit !important;
+            font-family: inherit !important;
+            font-weight: inherit !important;
+            line-height: inherit !important;
+        }
+
+        /* MOBILE STYLES */
+        @media screen and (max-width: 600px) {
+            .img-max {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: auto !important;
+            }
+
+            .mobile-padding {
+                padding-left: 20px !important;
+                padding-right: 20px !important;
+            }
+
+            .stack-column {
+                display: block !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                direction: ltr !important;
+            }
+        }
+    </style>
+</head>
+
+<body style="margin: 0; padding: 0; background-color: #f4f4f4;">
+
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f4f4;">
+        <tr>
+            <td align="center" style="padding: 20px 0;">
+                <table border="0" cellpadding="0" cellspacing="0" width="600" class="img-max"
+                    style="background-color: #FFF8DC; border: 1px solid #d4af37; font-family: Georgia, 'Times New Roman', Times, serif; color: #5a3a22;">
+
+                    <tr>
+                        <td align="center">
+                            <img src="https://via.placeholder.com/600x150/c00000/ffffff?text=Header+Graphic+(Jingle+Bells...)"
+                                width="600" height="auto" alt="Jingle Bells and Candy Canes"
+                                style="display: block; width: 100%; max-width: 600px;" border="0" />
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="left"
+                            style="padding: 20px 30px; font-size: 24px; font-style: italic; color: #c00000;">
+                            Dear {{ child_name }}, <span style="font-size: 20px;">&#10084;&#65039;</span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="center" style="padding: 10px 30px;">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td valign="top" class="stack-column" align="left"
+                                        style="font-size: 16px; line-height: 1.6;">
+                                        {{ letter_body | safe }}
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    {% if good_deed %}
+                    <tr>
+                        <td align="center" style="padding: 30px 20px 10px 20px;">
+                            <h2
+                                style="margin: 0; color: #c00000; font-family: Georgia, serif; font-size: 28px; font-style: italic; text-align: center;">
+                                &#11088; A Very Important Job For You! &#11088;
+                            </h2>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="center" style="padding: 10px 30px 30px 30px;">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td valign="middle" class="stack-column" align="left"
+                                        style="font-size: 18px; line-height: 1.5; padding-bottom: 20px;">
+                                        {{ good_deed }}
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    {% endif %}
+
+                    <tr>
+                        <td align="center" style="padding: 20px 30px;">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td width="120" valign="bottom" class="stack-column" align="center"
+                                        style="padding-bottom: 20px;">
+                                        <img src="https://via.placeholder.com/100x150/ffffff/000000?text=Snowman"
+                                            width="100" alt="Snowman" style="display: block;" />
+                                    </td>
+                                    <td valign="middle" class="stack-column" align="center" style="padding: 0 20px;">
+                                        <p
+                                            style="font-size: 22px; color: #c00000; font-weight: bold; margin-bottom: 20px;">
+                                            Merry Christmas, little friend! &#9731;&#65039;&#10084;&#65039;</p>
+                                        <p
+                                            style="font-size: 24px; font-style: italic; color: #5a3a22; line-height: 1.4;">
+                                            Love from the North Pole,<br>
+                                            Santa & The Elves &#127877;&#129499;&#129500;
+                                        </p>
+                                        <img src="https://via.placeholder.com/150x40/c00000/ffffff?text=Sleigh+Icon"
+                                            width="150" alt="Sleigh" style="display: inline-block; margin-top: 10px;" />
+                                    </td>
+                                    <td width="120" valign="bottom" class="stack-column" align="center">
+                                        <img src="https://via.placeholder.com/120x100/006400/ffffff?text=Elves+Waving"
+                                            width="120" alt="Elves waving" style="display: block;" />
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="center">
+                            <img src="https://via.placeholder.com/600x80/006400/ffffff?text=Footer+Garland+Graphic"
+                                width="600" height="auto" alt="" style="display: block; width: 100%; max-width: 600px;"
+                                border="0" />
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

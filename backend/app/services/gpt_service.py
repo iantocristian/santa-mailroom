@@ -315,6 +315,208 @@ Write a magical reply from Santa!"""
             logger.error(f"Error generating Santa reply: {e}")
             return f"Ho ho ho, dear {child_name}! Santa received your wonderful letter and was so happy to hear from you! Keep being good and remember that the magic of Christmas is all about love and kindness. 🎅", None
     
+    def generate_rich_santa_email(
+        self,
+        letter_text: str,
+        child_name: str,
+        child_age: Optional[int],
+        wish_items: List[dict],
+        denied_items: List[dict],
+        pending_deeds: List[str],
+        completed_deeds: List[str],
+        has_concerning_content: bool = False,
+        image_catalog: str = ""
+    ) -> dict:
+        """
+        Generate a complete rich HTML email from Santa with dynamic image selection.
+        
+        Args:
+            letter_text: The child's letter
+            child_name: Child's first name
+            child_age: Child's age (if known)
+            wish_items: List of approved/pending wish items
+            denied_items: List of denied items with reasons
+            pending_deeds: Incomplete good deeds
+            completed_deeds: Recently completed good deeds
+            has_concerning_content: If True, include supportive messaging
+            image_catalog: Formatted string of available images for GPT
+            
+        Returns:
+            Dict with keys: html_body, text_body, suggested_deed, images_used
+        """
+        
+        age_context = f"The child is approximately {child_age} years old." if child_age else "Age unknown."
+        
+        # Build context about items
+        items_context = ""
+        if wish_items:
+            items_context += f"\n\nApproved/pending wishes: {', '.join(w.get('name', w.get('raw_text', '')) for w in wish_items)}"
+        if denied_items:
+            items_context += f"\n\nItems to redirect (don't mention directly, suggest alternatives): "
+            for item in denied_items:
+                items_context += f"\n- {item.get('name', '')}: {item.get('reason', 'not available')}"
+        
+        # Build deeds context
+        deeds_context = ""
+        if completed_deeds:
+            deeds_context += f"\n\nGood deeds completed recently (acknowledge these!): {', '.join(completed_deeds)}"
+        if pending_deeds:
+            deeds_context += f"\n\nPending good deeds (gently encourage): {', '.join(pending_deeds)}"
+        
+        concerning_addon = ""
+        if has_concerning_content:
+            concerning_addon = """
+
+IMPORTANT: The letter contained some concerning content. Include warm, supportive messaging.
+Encourage the child to talk to their parents or a trusted adult if they're feeling sad or worried.
+Keep it gentle and not alarming."""
+
+        system_prompt = f"""You are Santa Claus creating a magical, personalized HTML email for a child.
+
+You will generate a complete HTML email body with images selected from the available catalog.
+The email should feel unique and personal, not formulaic.
+
+Guidelines:
+- Be warm, jolly, and magical
+- Use the child's name naturally throughout
+- Reference specific things from their letter
+- Keep appropriate for the child's age
+- Include 3-5 images from the catalog to make the email visually delightful
+- Suggest ONE simple good deed for the week
+
+MANDATORY IMAGES (must include these):
+- Header: Use cid:santa_sleigh as a banner image at the top (404x178)
+- Footer: Use cid:elves_bell near the closing (258x193)
+- Select 2-4 additional images from the catalog for the body
+
+{age_context}
+{items_context}
+{deeds_context}
+{concerning_addon}
+
+{image_catalog}
+
+CRITICAL HTML STRUCTURE RULES:
+1. Use table-based layout for email compatibility (no div, no CSS flexbox/grid)
+2. Images must use src="cid:NAME" format (e.g., src="cid:santa_sleigh")
+3. Use inline styles only (style="...")
+4. Keep width max 600px for main content, center align
+5. Use Georgia or serif fonts
+6. Colors: #c00000 (Santa red), #5a3a22 (warm brown), #FFF8DC (cream background)
+7. Wrap everything in a table with background-color: #FFF8DC and border: 1px solid #d4af37
+
+PLAIN TEXT VERSION:
+- Include festive emojis: 🎅 🎄 ❄️ 🎁 ⭐ 🦌 🛷 ❤️ ✨
+- Make it warm and readable without HTML
+- Keep the same magical content
+
+Respond with JSON in this exact format:
+{{
+    "html_body": "<table>...complete HTML email content with mandatory header/footer images...</table>",
+    "text_body": "🎅 Ho ho ho! Plain text version with emojis... 🎄",
+    "suggested_deed": "One specific good deed suggestion",
+    "images_used": ["santa_sleigh", "elves_bell", "other_cid_1", "other_cid_2"]
+}}
+
+Make each email unique and magical! Vary the structure, image placement, and writing style."""
+
+        user_prompt = f"""Create a magical email for {child_name}!
+
+Their letter:
+{letter_text}
+
+Generate a beautiful, unique HTML email from Santa with appropriate images. Remember to include the mandatory header (santa_sleigh) and footer (elves_bell) images!"""
+
+        try:
+            response = self._chat(
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                model=self.model,
+                response_format={"type": "json_object"}
+            )
+            
+            data = json.loads(response)
+            
+            # Ensure mandatory images are included
+            images = data.get("images_used", [])
+            if "santa_sleigh" not in images:
+                images.append("santa_sleigh")
+            if "elves_bell" not in images:
+                images.append("elves_bell")
+            
+            return {
+                "html_body": data.get("html_body", ""),
+                "text_body": data.get("text_body", f"🎅 Ho ho ho, dear {child_name}! Santa received your letter! 🎄"),
+                "suggested_deed": data.get("suggested_deed"),
+                "images_used": images
+            }
+            
+        except Exception as e:
+            logger.error(f"Error generating rich Santa email: {e}")
+            # Fallback to static template
+            return self._generate_fallback_email(child_name, letter_text)
+    
+    def _generate_fallback_email(self, child_name: str, letter_text: str) -> dict:
+        """Generate a static fallback email when GPT fails."""
+        
+        # Plain text with emojis
+        text_body = f"""🎅 Ho Ho Ho, dear {child_name}! 🎄
+
+❄️ Your wonderful letter has arrived at the North Pole! ❄️
+
+I was so happy to read what you wrote. My elves and I are working hard in our workshop, and the reindeer are practicing their flying for the big night! 🦌✨
+
+Remember to be kind to others and spread joy wherever you go. That's the true magic of Christmas! ⭐
+
+🎁 Keep being the wonderful person you are! 🎁
+
+With love from the North Pole,
+🎅 Santa Claus & The Elves 🧝‍♂️🧝‍♀️
+
+❤️ Merry Christmas! ❤️"""
+
+        # Static HTML with mandatory images
+        html_body = f"""<table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #FFF8DC; border: 1px solid #d4af37; font-family: Georgia, 'Times New Roman', serif; color: #5a3a22;">
+    <tr>
+        <td align="center" style="padding: 0;">
+            <img src="cid:santa_sleigh" width="404" height="178" alt="Santa's Sleigh" style="display: block;" />
+        </td>
+    </tr>
+    <tr>
+        <td align="left" style="padding: 20px 30px; font-size: 24px; font-style: italic; color: #c00000;">
+            Dear {child_name}, ❤️
+        </td>
+    </tr>
+    <tr>
+        <td align="left" style="padding: 10px 30px; font-size: 16px; line-height: 1.6;">
+            <p>Your wonderful letter has arrived at the North Pole! ❄️</p>
+            <p>I was so happy to read what you wrote. My elves and I are working hard in our workshop, and the reindeer are practicing their flying for the big night! 🦌✨</p>
+            <p>Remember to be kind to others and spread joy wherever you go. That's the true magic of Christmas! ⭐</p>
+            <p style="font-weight: bold; color: #c00000;">Keep being the wonderful person you are! 🎁</p>
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding: 20px;">
+            <img src="cid:elves_bell" width="258" height="193" alt="Elves celebrating" style="display: block;" />
+        </td>
+    </tr>
+    <tr>
+        <td align="center" style="padding: 20px 30px; font-size: 20px; font-style: italic; color: #c00000;">
+            With love from the North Pole,<br/>
+            <span style="font-size: 28px;">🎅 Santa Claus</span>
+        </td>
+    </tr>
+</table>"""
+
+        return {
+            "html_body": html_body,
+            "text_body": text_body,
+            "suggested_deed": "Do something kind for someone today!",
+            "images_used": ["santa_sleigh", "elves_bell"]
+        }
+    
     def generate_deed_email(
         self,
         child_name: str,

@@ -2,6 +2,7 @@
 Email service for fetching and sending emails.
 Handles POP3/IMAP for receiving and SMTP for sending Santa's replies.
 """
+import os
 import poplib
 import smtplib
 import email
@@ -251,6 +252,127 @@ class EmailService:
             
         except Exception as e:
             logger.error(f"Error sending email to {to_email}: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return False
+    
+    def send_rich_email(
+        self,
+        to_email: str,
+        to_name: Optional[str],
+        subject: str,
+        body_text: str,
+        body_html: str,
+        images_used: List[str],
+        in_reply_to: Optional[str] = None
+    ) -> bool:
+        """
+        Send a rich HTML email with embedded CID images.
+        
+        Args:
+            to_email: Recipient email address
+            to_name: Recipient name
+            subject: Email subject
+            body_text: Plain text body (fallback)
+            body_html: HTML body with cid: image references
+            images_used: List of CID names (e.g., ["santa_sleigh", "elf_letter"])
+            in_reply_to: Optional Message-ID to reply to
+            
+        Returns:
+            True if sent successfully, False otherwise.
+        """
+        from email.mime.image import MIMEImage
+        from app.email_templates.image_catalog import get_image_path, get_image_by_cid
+        
+        if not self.smtp_server or not self.smtp_username:
+            logger.error("SMTP not configured, cannot send email")
+            return False
+        
+        logger.info(f"Sending rich email to {to_email} with {len(images_used)} images")
+        
+        try:
+            # Create the root message as 'related' for embedded images
+            msg_root = MIMEMultipart("related")
+            msg_root["From"] = formataddr((self.santa_name, self.santa_email))
+            msg_root["To"] = formataddr((to_name or "", to_email))
+            msg_root["Subject"] = subject
+            
+            if in_reply_to:
+                msg_root["In-Reply-To"] = in_reply_to
+                msg_root["References"] = in_reply_to
+            
+            # Create alternative part for text/html
+            msg_alternative = MIMEMultipart("alternative")
+            msg_root.attach(msg_alternative)
+            
+            # Attach plain text version
+            msg_alternative.attach(MIMEText(body_text, "plain", "utf-8"))
+            
+            # Wrap HTML in full document structure
+            full_html = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Letter from Santa</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: Georgia, 'Times New Roman', serif;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f4f4f4;">
+        <tr>
+            <td align="center" style="padding: 20px 0;">
+                {body_html}
+            </td>
+        </tr>
+    </table>
+</body>
+</html>"""
+            
+            msg_alternative.attach(MIMEText(full_html, "html", "utf-8"))
+            
+            # Attach images
+            for cid in images_used:
+                image_path = get_image_path(cid)
+                if image_path and os.path.exists(image_path):
+                    img_info = get_image_by_cid(cid)
+                    with open(image_path, "rb") as img_file:
+                        img_data = img_file.read()
+                        
+                        # Determine image type from extension
+                        ext = os.path.splitext(image_path)[1].lower()
+                        img_type = "png" if ext == ".png" else "jpeg"
+                        
+                        mime_img = MIMEImage(img_data, _subtype=img_type)
+                        mime_img.add_header("Content-ID", f"<{cid}>")
+                        mime_img.add_header("Content-Disposition", "inline", filename=img_info.filename if img_info else f"{cid}.png")
+                        msg_root.attach(mime_img)
+                        logger.debug(f"Attached image: {cid}")
+                else:
+                    logger.warning(f"Image not found for CID: {cid}")
+            
+            # Send
+            logger.info("Connecting to SMTP server...")
+            if self.smtp_port == 465 or self.smtp_use_tls:
+                with smtplib.SMTP_SSL(self.smtp_server, self.smtp_port, timeout=30) as server:
+                    logger.info(f"Logging in as {self.smtp_username}...")
+                    server.login(self.smtp_username, self.smtp_password)
+                    logger.info("Sending rich message...")
+                    server.send_message(msg_root)
+            else:
+                with smtplib.SMTP(self.smtp_server, self.smtp_port, timeout=30) as server:
+                    server.ehlo()
+                    logger.info("Starting TLS...")
+                    server.starttls()
+                    server.ehlo()
+                    logger.info(f"Logging in as {self.smtp_username}...")
+                    server.login(self.smtp_username, self.smtp_password)
+                    logger.info("Sending rich message...")
+                    server.send_message(msg_root)
+            
+            logger.info(f"Successfully sent rich email to {to_email}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error sending rich email to {to_email}: {e}")
             import traceback
             logger.error(traceback.format_exc())
             return False

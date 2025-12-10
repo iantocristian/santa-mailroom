@@ -278,8 +278,11 @@ def handle_process_letter(db: Session, payload: dict):
                 wish_item.product_description = product.description
                 db.commit()
     
-    # 4. Generate Santa's reply
-    logger.info(f"Generating Santa reply...")
+    # 4. Generate Santa's rich HTML reply
+    logger.info(f"Generating rich Santa reply with images...")
+    
+    # Import image catalog for GPT
+    from app.email_templates.image_catalog import get_catalog_for_gpt
     
     pending_deeds = db.query(GoodDeed).filter(
         GoodDeed.child_id == child.id,
@@ -306,7 +309,8 @@ def handle_process_letter(db: Session, payload: dict):
     if child.birth_year:
         child_age = datetime.utcnow().year - child.birth_year
     
-    reply_text, suggested_deed = gpt_service.generate_santa_reply(
+    # Generate rich HTML email with dynamic image selection
+    rich_email = gpt_service.generate_rich_santa_email(
         letter_text=letter.body_text,
         child_name=child.name,
         child_age=child_age,
@@ -314,25 +318,31 @@ def handle_process_letter(db: Session, payload: dict):
         denied_items=[{"name": i.normalized_name or i.raw_text, "reason": i.denial_reason} for i in denied_items],
         pending_deeds=[d.description for d in pending_deeds],
         completed_deeds=[d.description for d in completed_deeds],
-        has_concerning_content=moderation_result.is_concerning
+        has_concerning_content=moderation_result.is_concerning,
+        image_catalog=get_catalog_for_gpt()
     )
     
-    # Create reply
+    # Create reply with both text and HTML
     santa_reply = SantaReply(
         letter_id=letter.id,
-        body_text=reply_text,
-        suggested_deed=suggested_deed,
+        body_text=rich_email["text_body"],
+        body_html=rich_email["html_body"],
+        suggested_deed=rich_email["suggested_deed"],
         delivery_status="pending"
     )
+    # Store images_used in payload for send handler
+    santa_reply.images_used = rich_email["images_used"]
     db.add(santa_reply)
     db.commit()
     db.refresh(santa_reply)
     
+    logger.info(f"Generated rich email with {len(rich_email['images_used'])} images: {rich_email['images_used']}")
+    
     # Create good deed if suggested
-    if suggested_deed:
+    if rich_email["suggested_deed"]:
         new_deed = GoodDeed(
             child_id=child.id,
-            description=suggested_deed,
+            description=rich_email["suggested_deed"],
             suggested_in_reply_id=santa_reply.id
         )
         db.add(new_deed)
@@ -348,17 +358,22 @@ def handle_process_letter(db: Session, payload: dict):
     
     logger.info(f"Letter {letter_id} processed, queueing reply")
     
-    # Queue sending
-    enqueue_job(db, "send_reply", {"reply_id": santa_reply.id})
+    # Queue sending with images info
+    enqueue_job(db, "send_reply", {
+        "reply_id": santa_reply.id,
+        "images_used": rich_email["images_used"]
+    })
 
 
 def handle_send_reply(db: Session, payload: dict):
     """Send a Santa reply email."""
     reply_id = payload.get("reply_id")
+    images_used = payload.get("images_used", [])
+    
     if not reply_id:
         raise ValueError("Missing reply_id in payload")
     
-    logger.info(f"Sending reply {reply_id}")
+    logger.info(f"Sending reply {reply_id} with {len(images_used)} images")
     email_service = get_email_service()
     gpt_service = get_gpt_service()
     
@@ -389,14 +404,27 @@ def handle_send_reply(db: Session, payload: dict):
         
         logger.info(f"Safety check PASSED for reply {reply_id}")
     
-    success = email_service.send_santa_reply(
-        to_email=letter.from_email,
-        to_name=child.name,
-        subject=f"Re: {letter.subject or 'Your letter to Santa'}",
-        body_text=reply.body_text,
-        body_html=reply.body_html,
-        in_reply_to=letter.message_id
-    )
+    # Use rich email if HTML body is available
+    if reply.body_html and images_used:
+        success = email_service.send_rich_email(
+            to_email=letter.from_email,
+            to_name=child.name,
+            subject=f"Re: {letter.subject or 'Your letter to Santa'}",
+            body_text=reply.body_text,
+            body_html=reply.body_html,
+            images_used=images_used,
+            in_reply_to=letter.message_id
+        )
+    else:
+        # Fallback to simple email
+        success = email_service.send_santa_reply(
+            to_email=letter.from_email,
+            to_name=child.name,
+            subject=f"Re: {letter.subject or 'Your letter to Santa'}",
+            body_text=reply.body_text,
+            body_html=reply.body_html,
+            in_reply_to=letter.message_id
+        )
     
     if success:
         reply.delivery_status = "sent"
