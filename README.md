@@ -20,7 +20,7 @@ santa/
 │   │   ├── routers/      # API routes
 │   │   ├── services/     # Business logic (email, GPT, etc.)
 │   │   ├── models.py     # SQLAlchemy models
-│   │   └── tasks.py      # Celery async tasks
+│   │   └── worker.py     # Background job worker
 │   ├── alembic/          # Database migrations
 │   └── requirements.txt
 │
@@ -41,7 +41,6 @@ santa/
 - Python 3.10+
 - Node.js 18+
 - PostgreSQL
-- Redis (for Celery task queue)
 
 ### 1. Setup PostgreSQL Database
 
@@ -111,7 +110,6 @@ All configuration is via environment variables (`.env` file):
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `GPT_MODEL` | `gpt-4o` | Model for generating replies |
-| `CELERY_BROKER_URL` | `redis://localhost:6379/0` | Redis URL for task queue |
 
 ## API Endpoints
 
