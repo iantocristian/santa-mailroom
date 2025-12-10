@@ -51,7 +51,7 @@ export default function Dashboard() {
                             textTransform: 'uppercase',
                             letterSpacing: 1
                         }}>
-                            ✉️ Tell your children to write to Santa at:
+                            ✉️ Tell your children to send their wish lists to Santa at:
                         </div>
                         <div style={{
                             fontSize: '1.4rem',
