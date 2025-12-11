@@ -137,7 +137,7 @@ export default function ScrapbookPage() {
                             </div>
 
                             {/* Letters for this year */}
-                            <div style={{ marginLeft: 60, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                            <div className="timeline-letters" style={{ marginLeft: 60, display: 'flex', flexDirection: 'column', gap: 16 }}>
                                 {lettersByYear[year].map(letter => {
                                     const isExpanded = expandedLetter === letter.id;
 

@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
 import { useFamilyStore } from './store/familyStore';
 import { useNotificationsStore } from './store/notificationsStore';
@@ -39,16 +39,30 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AppLayout({ children }: { children: React.ReactNode }) {
   const { fetchFamily } = useFamilyStore();
   const { fetchNotifications } = useNotificationsStore();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     fetchFamily();
     fetchNotifications();
   }, [fetchFamily, fetchNotifications]);
 
+  // Close sidebar when route changes (user navigated via sidebar)
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
   return (
     <div className="app-layout">
       <Snowfall />
-      <Sidebar />
+      <button
+        className="mobile-menu-btn"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        aria-label={sidebarOpen ? "Close menu" : "Open menu"}
+      >
+        {sidebarOpen ? '✕' : '☰'}
+      </button>
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <main className="main-content">
         {children}
       </main>

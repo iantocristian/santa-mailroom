@@ -1203,6 +1203,8 @@ body {
 
   .page-content {
     padding: 20px;
+    padding-top: 24px;
+    /* Aligned with menu button */
   }
 
   .stats-grid {
@@ -1212,6 +1214,65 @@ body {
   .children-grid,
   .wish-grid {
     grid-template-columns: 1fr;
+  }
+
+  /* Santa email banner mobile adjustments */
+  .santa-email-banner {
+    flex-direction: column !important;
+    text-align: center;
+    padding: 20px !important;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .santa-email-banner::before {
+    content: '🎅';
+    position: absolute;
+    font-size: 120px;
+    opacity: 0.1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .santa-email-banner .santa-icon-large {
+    display: none !important;
+  }
+
+  .santa-email-banner .btn {
+    width: 100%;
+    margin-top: 12px;
+  }
+
+  /* Smaller font sizes for Santa banner on mobile */
+  .santa-email-banner .santa-email-label {
+    font-size: 0.7rem !important;
+  }
+
+  .santa-email-banner .santa-email-address {
+    font-size: 0.85rem !important;
+    word-break: break-all;
+  }
+
+  /* Sidebar header left padding for menu button */
+  .sidebar-header {
+    padding-left: 60px;
+  }
+
+  /* Page header left padding to avoid menu button overlap */
+  .page-header {
+    padding-left: 50px !important;
+  }
+
+  /* Dashboard grid to single column on mobile */
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Scrapbook timeline - reduce left margin on mobile */
+  .timeline-letters {
+    margin-left: 12px !important;
   }
 }
 

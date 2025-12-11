@@ -42,9 +42,9 @@ export default function Dashboard() {
                     boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
                     border: '2px solid rgba(212, 175, 55, 0.3)'
                 }}>
-                    <div style={{ fontSize: 64, lineHeight: 1 }}>🎅</div>
+                    <div className="santa-icon-large" style={{ fontSize: 64, lineHeight: 1 }}>🎅</div>
                     <div style={{ flex: 1 }}>
-                        <div style={{
+                        <div className="santa-email-label" style={{
                             fontSize: '0.85rem',
                             color: 'rgba(255,255,255,0.7)',
                             marginBottom: 6,
@@ -53,7 +53,7 @@ export default function Dashboard() {
                         }}>
                             ✉️ Tell your children to send their wish lists to Santa at:
                         </div>
-                        <div style={{
+                        <div className="santa-email-address" style={{
                             fontSize: '1.4rem',
                             fontWeight: 700,
                             color: '#d4af37',
@@ -120,7 +120,7 @@ export default function Dashboard() {
             </div>
 
             {/* Main Content Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
+            <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
                 {/* Children Section */}
                 <div className="card">
                     <div className="card-header">
