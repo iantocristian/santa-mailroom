@@ -389,7 +389,7 @@ def handle_send_reply(db: Session, payload: dict):
     
     # Get family code for Reply-To header
     family = db.query(Family).filter(Family.id == child.family_id).first()
-    family_code = family.code if family else None
+    family_code = family.santa_code if family else None
     
     # Safety check before sending (if enabled)
     if settings.email_safety_check_enabled:
@@ -475,7 +475,7 @@ def handle_send_deed_email(db: Session, payload: dict):
     
     # Get family code for Reply-To header
     family = db.query(Family).filter(Family.id == child.family_id).first()
-    family_code = family.code if family else None
+    family_code = family.santa_code if family else None
     
     # Get child's last letter to find their email
     last_letter = db.query(Letter).filter(
@@ -580,7 +580,7 @@ def handle_send_deed_congrats(db: Session, payload: dict):
     
     # Get family code for Reply-To header
     family = db.query(Family).filter(Family.id == child.family_id).first()
-    family_code = family.code if family else None
+    family_code = family.santa_code if family else None
     
     # Get child's last letter to find their email
     last_letter = db.query(Letter).filter(
