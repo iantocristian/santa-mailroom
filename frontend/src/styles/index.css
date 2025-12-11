@@ -1274,6 +1274,15 @@ body {
   .timeline-letters {
     margin-left: 12px !important;
   }
+
+  /* Filter rows - better wrapping on mobile with aligned labels */
+  .filter-item:first-child {
+    width: 100%;
+  }
+
+  .filter-item label {
+    min-width: 50px;
+  }
 }
 
 @media (max-width: 480px) {

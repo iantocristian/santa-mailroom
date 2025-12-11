@@ -60,8 +60,8 @@ export default function WishlistPage() {
             {/* Filters */}
             <div className="card" style={{ marginBottom: 24 }}>
                 <div className="card-body" style={{ padding: '12px 20px' }}>
-                    <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div className="filter-row" style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <div className="filter-item" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Child:</label>
                             <select
                                 className="form-input"
@@ -76,7 +76,7 @@ export default function WishlistPage() {
                             </select>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div className="filter-item" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Status:</label>
                             <select
                                 className="form-input"
@@ -92,7 +92,7 @@ export default function WishlistPage() {
                             </select>
                         </div>
 
-                        <div style={{ marginLeft: 'auto', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                        <div className="filter-count" style={{ marginLeft: 'auto', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                             {items.length} item{items.length !== 1 ? 's' : ''}
                         </div>
                     </div>

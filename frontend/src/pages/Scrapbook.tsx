@@ -176,8 +176,15 @@ export default function ScrapbookPage() {
                                                             {formatDate(letter.received_at)}
                                                         </div>
                                                     </div>
-                                                    <div style={{ marginLeft: 'auto', fontSize: '1.5rem' }}>
-                                                        {isExpanded ? '📖' : '✉️'}
+                                                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                        {letter.wish_items && letter.wish_items.length > 0 && (
+                                                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                                                🎁 {letter.wish_items.length}
+                                                            </span>
+                                                        )}
+                                                        <span style={{ fontSize: '1.5rem' }}>
+                                                            {isExpanded ? '📖' : '✉️'}
+                                                        </span>
                                                     </div>
                                                 </div>
 
