@@ -1,6 +1,7 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useChildrenStore } from '../store/childrenStore';
 import { COUNTRIES } from '../constants/countries';
+import { LANGUAGES } from '../constants/languages';
 import type { ChildCreate } from '../types';
 
 export default function ChildrenPage() {
@@ -11,6 +12,7 @@ export default function ChildrenPage() {
         email: '',
         country: '',
         birth_year: undefined,
+        language: '',
     });
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,7 +29,7 @@ export default function ChildrenPage() {
         try {
             await addChild(formData);
             setShowModal(false);
-            setFormData({ name: '', email: '', country: '', birth_year: undefined });
+            setFormData({ name: '', email: '', country: '', birth_year: undefined, language: '' });
         } catch (err: unknown) {
             const error = err as { response?: { data?: { detail?: string | Array<{ msg: string }> } } };
             const detail = error.response?.data?.detail;
@@ -225,6 +227,23 @@ export default function ChildrenPage() {
                                             max={new Date().getFullYear()}
                                         />
                                     </div>
+                                </div>
+
+                                <div className="form-group">
+                                    <label className="form-label">Email Language 🌍</label>
+                                    <select
+                                        className="form-input"
+                                        value={formData.language || ''}
+                                        onChange={(e) => setFormData({ ...formData, language: e.target.value || undefined })}
+                                    >
+                                        <option value="">English (default)</option>
+                                        {LANGUAGES.filter(l => l.code !== 'en').map(l => (
+                                            <option key={l.code} value={l.code}>{l.name} ({l.native})</option>
+                                        ))}
+                                    </select>
+                                    <small style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                                        Santa will write emails in this language
+                                    </small>
                                 </div>
                             </div>
 

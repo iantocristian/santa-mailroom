@@ -325,7 +325,8 @@ Write a magical reply from Santa!"""
         pending_deeds: List[str],
         completed_deeds: List[str],
         has_concerning_content: bool = False,
-        image_catalog: str = ""
+        image_catalog: str = "",
+        language: Optional[str] = None
     ) -> dict:
         """
         Generate a complete rich HTML email from Santa with dynamic image selection.
@@ -371,7 +372,16 @@ IMPORTANT: The letter contained some concerning content. Include warm, supportiv
 Encourage the child to talk to their parents or a trusted adult if they're feeling sad or worried.
 Keep it gentle and not alarming."""
 
-        system_prompt = f"""You are Santa Claus creating a magical, personalized HTML email for a child.
+        language_instruction = ""
+        if language and language.lower() != "en":
+            language_instruction = f"""
+
+LANGUAGE REQUIREMENT: Write the ENTIRE email in {language.upper()}. 
+This includes ALL text: greeting, body, headings, good deed, closing, signature.
+Use culturally appropriate expressions and style for this language.
+Only the image CID references should remain in English (e.g., cid:santa_sleigh)."""
+
+        system_prompt = f"""You are Santa Claus creating a magical, personalized HTML email for a child.{language_instruction}
 
 You will generate a complete HTML email body with images selected from the available catalog.
 The email should feel unique and personal, not formulaic.
@@ -575,7 +585,8 @@ With love from the North Pole,
         self,
         child_name: str,
         child_age: Optional[int],
-        deed_description: str
+        deed_description: str,
+        language: Optional[str] = None
     ) -> dict:
         """
         Generate a special rich HTML email from Santa about a new good deed.
@@ -593,7 +604,16 @@ With love from the North Pole,
         age_context = f"The child is approximately {child_age} years old." if child_age else "Age unknown."
         image_catalog = get_catalog_for_gpt()
         
-        system_prompt = f"""You are Santa Claus, writing a magical HTML email to a child about a special good deed!
+        language_instruction = ""
+        if language and language.lower() != "en":
+            language_instruction = f"""
+
+LANGUAGE REQUIREMENT: Write the ENTIRE email in {language.upper()}.
+This includes ALL text: greeting, body, headings, closing, signature.
+Use culturally appropriate expressions and style for this language.
+"""
+        
+        system_prompt = f"""You are Santa Claus, writing a magical HTML email to a child about a special good deed!{language_instruction}
 
 Guidelines:
 - Be warm, jolly, and magical with LOTS OF EMOJIS! 🎅❤️✨
@@ -680,7 +700,8 @@ Write a magical, visually rich email from Santa about this good deed! Include im
         child_name: str,
         child_age: Optional[int],
         deed_description: str,
-        parent_note: Optional[str] = None
+        parent_note: Optional[str] = None,
+        language: Optional[str] = None
     ) -> dict:
         """
         Generate a rich HTML congratulations email from Santa for completing a good deed.
@@ -703,7 +724,16 @@ Write a magical, visually rich email from Santa about this good deed! Include im
         if parent_note:
             note_context = f"\n\nNote from parent about how it went: {parent_note}"
         
-        system_prompt = f"""You are Santa Claus, writing a CELEBRATORY HTML email to a child who completed a good deed!
+        language_instruction = ""
+        if language and language.lower() != "en":
+            language_instruction = f"""
+
+LANGUAGE REQUIREMENT: Write the ENTIRE email in {language.upper()}.
+This includes ALL text: greeting, body, headings, celebration message, closing, signature.
+Use culturally appropriate expressions and style for this language.
+"""
+        
+        system_prompt = f"""You are Santa Claus, writing a CELEBRATORY HTML email to a child who completed a good deed!{language_instruction}
 
 Guidelines:
 - Be VERY excited and proud with LOTS OF EMOJIS! 🎉🎅❤️✨⭐

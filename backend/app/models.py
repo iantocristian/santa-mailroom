@@ -111,6 +111,7 @@ class Child(Base):
     country = Column(String(2), nullable=True)  # ISO 3166-1 alpha-2 country code
     birth_year = Column(Integer, nullable=True)  # For age-appropriate filtering
     avatar_url = Column(String(500), nullable=True)
+    language = Column(String(10), nullable=True)  # Language for Santa's emails, e.g., "en", "es"
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

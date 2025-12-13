@@ -85,6 +85,7 @@ class ChildCreate(BaseModel):
     country: Optional[str] = Field(None, max_length=100)
     birth_year: Optional[int] = Field(None, ge=1900, le=2100)
     avatar_url: Optional[str] = None
+    language: Optional[str] = Field(None, max_length=10)  # e.g., "en", "es", "fr"
 
 
 class ChildUpdate(BaseModel):
@@ -92,6 +93,7 @@ class ChildUpdate(BaseModel):
     country: Optional[str] = Field(None, max_length=100)
     birth_year: Optional[int] = Field(None, ge=1900, le=2100)
     avatar_url: Optional[str] = None
+    language: Optional[str] = Field(None, max_length=10)
 
 
 class ChildResponse(BaseModel):
@@ -100,6 +102,7 @@ class ChildResponse(BaseModel):
     country: Optional[str]
     birth_year: Optional[int]
     avatar_url: Optional[str]
+    language: Optional[str]
     created_at: datetime
     letter_count: Optional[int] = None  # Computed field
 

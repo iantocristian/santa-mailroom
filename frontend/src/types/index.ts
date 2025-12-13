@@ -52,6 +52,7 @@ export interface Child {
   country: string | null;
   birth_year: number | null;
   avatar_url: string | null;
+  language: string | null;
   created_at: string;
   letter_count?: number;
   wish_item_count?: number;
@@ -65,6 +66,7 @@ export interface ChildCreate {
   country?: string;
   birth_year?: number;
   avatar_url?: string;
+  language?: string;
 }
 
 // ============== Letters ==============

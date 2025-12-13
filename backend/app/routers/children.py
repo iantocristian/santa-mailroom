@@ -46,6 +46,7 @@ def list_children(
             country=child.country,
             birth_year=child.birth_year,
             avatar_url=child.avatar_url,
+            language=child.language,
             created_at=child.created_at,
             letter_count=letter_count,
             wish_item_count=wish_item_count,
@@ -89,7 +90,8 @@ def create_child(
         email_hash=email_hash,
         country=child_data.country,
         birth_year=child_data.birth_year,
-        avatar_url=child_data.avatar_url
+        avatar_url=child_data.avatar_url,
+        language=child_data.language
     )
     
     db.add(child)

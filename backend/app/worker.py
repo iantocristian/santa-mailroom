@@ -319,7 +319,8 @@ def handle_process_letter(db: Session, payload: dict):
         pending_deeds=[d.description for d in pending_deeds],
         completed_deeds=[d.description for d in completed_deeds],
         has_concerning_content=moderation_result.is_concerning,
-        image_catalog=get_catalog_for_gpt()
+        image_catalog=get_catalog_for_gpt(),
+        language=child.language
     )
     
     # Create reply with both text and HTML
@@ -495,7 +496,8 @@ def handle_send_deed_email(db: Session, payload: dict):
     rich_email = gpt_service.generate_deed_email(
         child_name=child.name,
         child_age=child_age,
-        deed_description=deed.description
+        deed_description=deed.description,
+        language=child.language
     )
     
     # Safety check before sending (if enabled)
@@ -601,7 +603,8 @@ def handle_send_deed_congrats(db: Session, payload: dict):
         child_name=child.name,
         child_age=child_age,
         deed_description=deed.description,
-        parent_note=deed.parent_note
+        parent_note=deed.parent_note,
+        language=child.language
     )
     
     # Safety check before sending (if enabled)
