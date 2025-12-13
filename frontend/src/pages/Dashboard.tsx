@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useFamilyStore } from '../store/familyStore';
 import { useChildrenStore } from '../store/childrenStore';
 import { useNotificationsStore } from '../store/notificationsStore';
 
 export default function Dashboard() {
+    const { t } = useTranslation();
     const { family, stats, fetchFamily, fetchStats } = useFamilyStore();
     const { children, fetchChildren } = useChildrenStore();
     const { notifications, fetchNotifications } = useNotificationsStore();
@@ -23,7 +25,6 @@ export default function Dashboard() {
             setCopyStatus('copied');
             setTimeout(() => setCopyStatus('idle'), 2000);
         } catch (err) {
-            // Fallback for browsers that don't support clipboard API
             const textArea = document.createElement('textarea');
             textArea.value = text;
             textArea.style.position = 'fixed';
@@ -47,7 +48,7 @@ export default function Dashboard() {
             <div className="page-header" style={{ marginBottom: 32, padding: 0, border: 'none', background: 'transparent' }}>
                 <h1 className="page-title">
                     <span className="title-icon">🎅</span>
-                    Santa's Dashboard
+                    {t('dashboard.title')}
                 </h1>
             </div>
 
@@ -73,7 +74,7 @@ export default function Dashboard() {
                             textTransform: 'uppercase',
                             letterSpacing: 1
                         }}>
-                            ✉️ Tell your children to send their wish lists to Santa at:
+                            ✉️ {t('dashboard.sendEmailTo')}
                         </div>
                         <div className="santa-email-address" style={{
                             fontSize: '1.4rem',
@@ -89,7 +90,7 @@ export default function Dashboard() {
                             color: 'rgba(255,255,255,0.5)',
                             marginTop: 6
                         }}>
-                            Family Code: <strong style={{ color: 'rgba(255,255,255,0.8)' }}>{family.santa_code}</strong>
+                            {t('dashboard.familyCode')} <strong style={{ color: 'rgba(255,255,255,0.8)' }}>{family.santa_code}</strong>
                         </div>
                     </div>
                     <button
@@ -108,9 +109,9 @@ export default function Dashboard() {
                             transition: 'all 0.2s ease'
                         }}
                     >
-                        {copyStatus === 'copied' ? '✓ Copied!' :
-                            copyStatus === 'error' ? '⚠️ Failed' :
-                                '📋 Copy Email'}
+                        {copyStatus === 'copied' ? `✓ ${t('dashboard.copied')}` :
+                            copyStatus === 'error' ? `⚠️ ${t('dashboard.copyFailed')}` :
+                                `📋 ${t('dashboard.copyEmail')}`}
                     </button>
                 </div>
             )}
@@ -121,7 +122,7 @@ export default function Dashboard() {
                     <div className="stat-icon green">👧</div>
                     <div className="stat-content">
                         <div className="stat-value">{stats?.total_children ?? 0}</div>
-                        <div className="stat-label">Children</div>
+                        <div className="stat-label">{t('dashboard.children')}</div>
                     </div>
                 </div>
 
@@ -129,7 +130,7 @@ export default function Dashboard() {
                     <div className="stat-icon red">✉️</div>
                     <div className="stat-content">
                         <div className="stat-value">{stats?.total_letters ?? 0}</div>
-                        <div className="stat-label">Letters</div>
+                        <div className="stat-label">{t('dashboard.letters')}</div>
                     </div>
                 </div>
 
@@ -137,7 +138,7 @@ export default function Dashboard() {
                     <div className="stat-icon gold">🎁</div>
                     <div className="stat-content">
                         <div className="stat-value">{stats?.total_wish_items ?? 0}</div>
-                        <div className="stat-label">Wishes</div>
+                        <div className="stat-label">{t('dashboard.wishes')}</div>
                     </div>
                 </div>
 
@@ -145,7 +146,7 @@ export default function Dashboard() {
                     <div className="stat-icon green">⭐</div>
                     <div className="stat-content">
                         <div className="stat-value">{stats?.completed_deeds ?? 0}</div>
-                        <div className="stat-label">Good Deeds</div>
+                        <div className="stat-label">{t('dashboard.goodDeeds')}</div>
                     </div>
                 </div>
             </div>
@@ -156,17 +157,17 @@ export default function Dashboard() {
                 <div className="card">
                     <div className="card-header">
                         <h2 className="card-title">
-                            <span>👧</span> Your Children
+                            <span>👧</span> {t('dashboard.yourChildren')}
                         </h2>
-                        <Link to="/children" className="btn btn-sm btn-primary">+ Add Child</Link>
+                        <Link to="/children" className="btn btn-sm btn-primary">+ {t('dashboard.addChild')}</Link>
                     </div>
                     <div className="card-body">
                         {children.length === 0 ? (
                             <div className="empty-state">
                                 <div className="empty-state-icon">🧒</div>
-                                <h3>No children registered yet</h3>
-                                <p>Add your first child to get started with Santa's mailroom!</p>
-                                <Link to="/children" className="btn btn-primary">Add Your First Child</Link>
+                                <h3>{t('dashboard.noChildrenYet')}</h3>
+                                <p>{t('dashboard.addFirstChildDesc')}</p>
+                                <Link to="/children" className="btn btn-primary">{t('dashboard.addFirstChild')}</Link>
                             </div>
                         ) : (
                             <div className="children-grid">
@@ -185,7 +186,7 @@ export default function Dashboard() {
                                                 <div className="child-meta">
                                                     {child.country && <span>{child.country} </span>}
                                                     {child.birth_year && (
-                                                        <span>• {new Date().getFullYear() - child.birth_year} years old</span>
+                                                        <span>• {new Date().getFullYear() - child.birth_year} {t('common.yearsOld')}</span>
                                                     )}
                                                 </div>
                                             </div>
@@ -193,15 +194,15 @@ export default function Dashboard() {
                                         <div className="child-stats">
                                             <div className="child-stat">
                                                 <div className="child-stat-value">{child.letter_count ?? 0}</div>
-                                                <div className="child-stat-label">Letters</div>
+                                                <div className="child-stat-label">{t('children.letters')}</div>
                                             </div>
                                             <div className="child-stat">
                                                 <div className="child-stat-value">{child.wish_item_count ?? 0}</div>
-                                                <div className="child-stat-label">Wishes</div>
+                                                <div className="child-stat-label">{t('children.wishes')}</div>
                                             </div>
                                             <div className="child-stat">
                                                 <div className="child-stat-value">{child.completed_deeds ?? 0}</div>
-                                                <div className="child-stat-label">Deeds</div>
+                                                <div className="child-stat-label">{t('children.deeds')}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -215,15 +216,15 @@ export default function Dashboard() {
                 <div className="card">
                     <div className="card-header">
                         <h2 className="card-title">
-                            <span>🔔</span> Recent Activity
+                            <span>🔔</span> {t('dashboard.recentActivity')}
                         </h2>
                     </div>
                     <div className="card-body" style={{ padding: 0 }}>
                         {notifications.length === 0 ? (
                             <div className="empty-state" style={{ padding: 40 }}>
                                 <div className="empty-state-icon">🔔</div>
-                                <h3>No notifications yet</h3>
-                                <p>New letters and alerts will appear here!</p>
+                                <h3>{t('dashboard.noNotifications')}</h3>
+                                <p>{t('dashboard.notificationsDesc')}</p>
                             </div>
                         ) : (
                             <div style={{ maxHeight: 400, overflow: 'auto' }}>
@@ -266,13 +267,13 @@ export default function Dashboard() {
                 <div className="alert-banner warning" style={{ marginTop: 24 }}>
                     <span>⚠️</span>
                     <div>
-                        <strong>{stats.pending_moderation_flags} letter(s) need review</strong>
+                        <strong>{t('dashboard.lettersNeedReview', { count: stats.pending_moderation_flags })}</strong>
                         <p style={{ margin: 0, fontSize: '0.9rem' }}>
-                            Some letters have been flagged for concerning content.
+                            {t('dashboard.moderationDesc')}
                         </p>
                     </div>
                     <Link to="/moderation" className="btn btn-sm btn-secondary" style={{ marginLeft: 'auto' }}>
-                        Review Now
+                        {t('dashboard.reviewNow')}
                     </Link>
                 </div>
             )}
@@ -282,9 +283,9 @@ export default function Dashboard() {
                 <div className="alert-banner info" style={{ marginTop: 16 }}>
                     <span>💰</span>
                     <div>
-                        <strong>Budget Update</strong>
+                        <strong>{t('dashboard.budgetUpdate')}</strong>
                         <p style={{ margin: 0, fontSize: '0.9rem' }}>
-                            Total estimated wishlist cost: ${stats.total_estimated_budget.toFixed(2)}
+                            {t('dashboard.totalEstimatedCost', { amount: `$${stats.total_estimated_budget.toFixed(2)}` })}
                         </p>
                     </div>
                 </div>

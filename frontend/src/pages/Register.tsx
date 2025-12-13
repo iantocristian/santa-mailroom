@@ -1,8 +1,10 @@
 import { useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/authStore';
 
 export default function Register() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -17,12 +19,12 @@ export default function Register() {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('auth.passwordMismatch'));
       return;
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError(t('auth.passwordTooShort'));
       return;
     }
 
@@ -32,7 +34,7 @@ export default function Register() {
       await register(email, password, inviteToken, name || undefined);
     } catch (err: unknown) {
       const error = err as { response?: { data?: { detail?: string } } };
-      setError(error.response?.data?.detail || 'Failed to register. Please try again.');
+      setError(error.response?.data?.detail || t('auth.registerFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -44,16 +46,16 @@ export default function Register() {
         <div className="auth-header">
           <div className="auth-logo">
             <span className="logo-icon">🎅</span>
-            <span className="logo-text">Santa's Mailroom</span>
+            <span className="logo-text">{t('auth.appName')}</span>
           </div>
-          <p className="auth-subtitle">Join Santa's parent network!</p>
+          <p className="auth-subtitle">{t('auth.joinNetwork')}</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           {error && <div className="auth-error">{error}</div>}
 
           <div className="form-group">
-            <label className="form-label">Your Name</label>
+            <label className="form-label">{t('auth.yourName')}</label>
             <input
               type="text"
               className="form-input"
@@ -65,7 +67,7 @@ export default function Register() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Email</label>
+            <label className="form-label">{t('auth.email')}</label>
             <input
               type="email"
               className="form-input"
@@ -77,7 +79,7 @@ export default function Register() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Password</label>
+            <label className="form-label">{t('auth.password')}</label>
             <input
               type="password"
               className="form-input"
@@ -89,7 +91,7 @@ export default function Register() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Confirm Password</label>
+            <label className="form-label">{t('auth.confirmPassword')}</label>
             <input
               type="password"
               className="form-input"
@@ -101,7 +103,7 @@ export default function Register() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Invite Token</label>
+            <label className="form-label">{t('auth.inviteToken')}</label>
             <input
               type="text"
               className="form-input"
@@ -111,7 +113,7 @@ export default function Register() {
               required
             />
             <small style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-              Ask the workshop admin for an invite token
+              {t('auth.inviteTokenHint')}
             </small>
           </div>
 
@@ -119,18 +121,18 @@ export default function Register() {
             {isLoading ? (
               <>
                 <span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} />
-                Creating your account...
+                {t('auth.creatingAccount')}
               </>
             ) : (
-              <>🎄 Create Account</>
+              <>🎄 {t('auth.createAccount')}</>
             )}
           </button>
         </form>
 
         <p className="auth-footer">
-          Already have an account?{' '}
+          {t('auth.hasAccount')}{' '}
           <Link to="/login" className="auth-link">
-            Sign in
+            {t('auth.signInLink')}
           </Link>
         </p>
       </div>

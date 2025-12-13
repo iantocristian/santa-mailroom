@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useChildrenStore } from '../store/childrenStore';
 import api from '../api/client';
 
@@ -15,19 +16,20 @@ interface SentEmail {
     delivery_status: string;
 }
 
-const EMAIL_TYPE_LABELS: Record<string, { label: string; icon: string; color: string }> = {
-    letter_reply: { label: 'Letter Reply', icon: '✉️', color: 'var(--green)' },
-    deed_suggestion: { label: 'Good Deed', icon: '⭐', color: 'var(--gold)' },
-    deed_congrats: { label: 'Congratulations', icon: '🎉', color: 'var(--red)' },
-};
-
 export default function SentEmailsPage() {
+    const { t } = useTranslation();
     const { children, fetchChildren } = useChildrenStore();
     const [emails, setEmails] = useState<SentEmail[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedChild, setSelectedChild] = useState<number | undefined>();
     const [selectedType, setSelectedType] = useState<string | undefined>();
     const [expandedEmail, setExpandedEmail] = useState<number | null>(null);
+
+    const EMAIL_TYPE_LABELS: Record<string, { label: string; icon: string; color: string }> = {
+        letter_reply: { label: t('sentEmails.letterReply'), icon: '✉️', color: 'var(--green)' },
+        deed_suggestion: { label: t('sentEmails.deedSuggestion'), icon: '⭐', color: 'var(--gold)' },
+        deed_congrats: { label: t('sentEmails.deedCongrats'), icon: '🎉', color: 'var(--red)' },
+    };
 
     useEffect(() => {
         fetchChildren();
@@ -65,7 +67,7 @@ export default function SentEmailsPage() {
             <div className="page-header" style={{ marginBottom: 24, padding: 0, border: 'none', background: 'transparent' }}>
                 <h1 className="page-title">
                     <span className="title-icon">📤</span>
-                    Sent Emails
+                    {t('sentEmails.title')}
                 </h1>
             </div>
 
@@ -74,14 +76,14 @@ export default function SentEmailsPage() {
                 <div className="card-body" style={{ padding: '12px 20px' }}>
                     <div className="filter-row" style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
                         <div className="filter-item" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Child:</label>
+                            <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{t('sentEmails.child')}</label>
                             <select
                                 className="form-input"
                                 style={{ width: 'auto', padding: '6px 12px' }}
                                 value={selectedChild || ''}
                                 onChange={(e) => setSelectedChild(e.target.value ? parseInt(e.target.value) : undefined)}
                             >
-                                <option value="">All Children</option>
+                                <option value="">{t('common.allChildren')}</option>
                                 {children.map(child => (
                                     <option key={child.id} value={child.id}>{child.name}</option>
                                 ))}
@@ -89,17 +91,17 @@ export default function SentEmailsPage() {
                         </div>
 
                         <div className="filter-item" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Type:</label>
+                            <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{t('sentEmails.type')}</label>
                             <select
                                 className="form-input"
                                 style={{ width: 'auto', padding: '6px 12px' }}
                                 value={selectedType || ''}
                                 onChange={(e) => setSelectedType(e.target.value || undefined)}
                             >
-                                <option value="">All Types</option>
-                                <option value="letter_reply">Letter Replies</option>
-                                <option value="deed_suggestion">Good Deed Suggestions</option>
-                                <option value="deed_congrats">Congratulations</option>
+                                <option value="">{t('sentEmails.allTypes')}</option>
+                                <option value="letter_reply">{t('sentEmails.letterReplies')}</option>
+                                <option value="deed_suggestion">{t('sentEmails.deedSuggestions')}</option>
+                                <option value="deed_congrats">{t('sentEmails.congratulations')}</option>
                             </select>
                         </div>
 
@@ -120,8 +122,8 @@ export default function SentEmailsPage() {
                     <div className="card-body">
                         <div className="empty-state">
                             <div className="empty-state-icon">📤</div>
-                            <h3>No sent emails yet</h3>
-                            <p>Santa's emails to children will appear here.</p>
+                            <h3>{t('sentEmails.noEmailsYet')}</h3>
+                            <p>{t('sentEmails.noEmailsDesc')}</p>
                         </div>
                     </div>
                 </div>
@@ -155,7 +157,7 @@ export default function SentEmailsPage() {
                                         </div>
                                         <div style={{ flex: 1, minWidth: 0 }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                                                <span style={{ fontWeight: 600 }}>{email.subject || '(No subject)'}</span>
+                                                <span style={{ fontWeight: 600 }}>{email.subject || t('sentEmails.noSubject')}</span>
                                                 <span style={{
                                                     fontSize: '0.75rem',
                                                     padding: '2px 8px',
@@ -167,7 +169,7 @@ export default function SentEmailsPage() {
                                                 </span>
                                             </div>
                                             <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                                                To: {email.child_name} • {formatDate(email.sent_at)}
+                                                {t('sentEmails.to')} {email.child_name} • {formatDate(email.sent_at)}
                                             </div>
                                         </div>
                                         <div style={{ fontSize: '1.2rem' }}>
@@ -175,7 +177,6 @@ export default function SentEmailsPage() {
                                         </div>
                                     </div>
 
-                                    {/* Expanded content */}
                                     {isExpanded && (
                                         <div style={{ marginTop: 16 }}>
                                             <div style={{
@@ -191,9 +192,9 @@ export default function SentEmailsPage() {
                                             </div>
 
                                             <div style={{ marginTop: 12, fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                                Status: {email.delivery_status === 'sent' ? '✅ Delivered' : '❌ Failed'}
-                                                {email.letter_id && ` • Related to Letter #${email.letter_id}`}
-                                                {email.deed_id && ` • Related to Deed #${email.deed_id}`}
+                                                {t('sentEmails.status')} {email.delivery_status === 'sent' ? `✅ ${t('sentEmails.delivered')}` : `❌ ${t('sentEmails.failed')}`}
+                                                {email.letter_id && ` • ${t('sentEmails.relatedToLetter', { id: email.letter_id })}`}
+                                                {email.deed_id && ` • ${t('sentEmails.relatedToDeed', { id: email.deed_id })}`}
                                             </div>
                                         </div>
                                     )}

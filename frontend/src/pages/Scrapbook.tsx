@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLettersStore } from '../store/lettersStore';
 import { useChildrenStore } from '../store/childrenStore';
 
 export default function ScrapbookPage() {
+    const { t } = useTranslation();
     const { letters, isLoading, fetchLetters } = useLettersStore();
     const { children, fetchChildren } = useChildrenStore();
     const [selectedChild, setSelectedChild] = useState<number | undefined>();
@@ -20,7 +22,6 @@ export default function ScrapbookPage() {
         return children.find(c => c.id === childId)?.name || 'Unknown';
     };
 
-    // Group letters by year
     const lettersByYear = letters.reduce((acc, letter) => {
         const year = letter.year || new Date(letter.received_at).getFullYear();
         if (!acc[year]) acc[year] = [];
@@ -30,7 +31,7 @@ export default function ScrapbookPage() {
 
     const years = Object.keys(lettersByYear)
         .map(Number)
-        .sort((a, b) => b - a); // Most recent first
+        .sort((a, b) => b - a);
 
     const formatDate = (dateStr: string) => {
         return new Date(dateStr).toLocaleDateString('en-US', {
@@ -45,7 +46,7 @@ export default function ScrapbookPage() {
             <div className="page-header" style={{ marginBottom: 24, padding: 0, border: 'none', background: 'transparent' }}>
                 <h1 className="page-title">
                     <span className="title-icon">📖</span>
-                    Christmas Scrapbook
+                    {t('scrapbook.title')}
                 </h1>
             </div>
 
@@ -54,21 +55,21 @@ export default function ScrapbookPage() {
                 <div className="card-body" style={{ padding: '12px 20px' }}>
                     <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Child:</label>
+                            <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{t('scrapbook.child')}</label>
                             <select
                                 className="form-input"
                                 style={{ width: 'auto', padding: '6px 12px' }}
                                 value={selectedChild || ''}
                                 onChange={(e) => setSelectedChild(e.target.value ? parseInt(e.target.value) : undefined)}
                             >
-                                <option value="">All Children</option>
+                                <option value="">{t('common.allChildren')}</option>
                                 {children.map(child => (
                                     <option key={child.id} value={child.id}>{child.name}</option>
                                 ))}
                             </select>
                         </div>
                         <div style={{ marginLeft: 'auto', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                            {letters.length} letter{letters.length !== 1 ? 's' : ''} • {years.length} year{years.length !== 1 ? 's' : ''}
+                            {letters.length} {letters.length !== 1 ? t('common.letters') : t('common.letter')} • {years.length} {years.length !== 1 ? t('common.years') : t('common.year')}
                         </div>
                     </div>
                 </div>
@@ -84,14 +85,13 @@ export default function ScrapbookPage() {
                     <div className="card-body">
                         <div className="empty-state">
                             <div className="empty-state-icon">📖</div>
-                            <h3>No letters in the scrapbook yet</h3>
-                            <p>When children write to Santa, their letters will be saved here forever!</p>
+                            <h3>{t('scrapbook.noLettersYet')}</h3>
+                            <p>{t('scrapbook.noLettersDesc')}</p>
                         </div>
                     </div>
                 </div>
             ) : (
                 <div style={{ position: 'relative' }}>
-                    {/* Timeline line */}
                     <div style={{
                         position: 'absolute',
                         left: 20,
@@ -104,7 +104,6 @@ export default function ScrapbookPage() {
 
                     {years.map(year => (
                         <div key={year} style={{ marginBottom: 40 }}>
-                            {/* Year marker */}
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -132,11 +131,10 @@ export default function ScrapbookPage() {
                                     fontWeight: 700,
                                     color: 'var(--gold)'
                                 }}>
-                                    Christmas {year}
+                                    {t('scrapbook.christmas', { year })}
                                 </h2>
                             </div>
 
-                            {/* Letters for this year */}
                             <div className="timeline-letters" style={{ marginLeft: 60, display: 'flex', flexDirection: 'column', gap: 16 }}>
                                 {lettersByYear[year].map(letter => {
                                     const isExpanded = expandedLetter === letter.id;
@@ -154,7 +152,6 @@ export default function ScrapbookPage() {
                                             onClick={() => setExpandedLetter(isExpanded ? null : letter.id)}
                                         >
                                             <div className="card-body" style={{ padding: 20 }}>
-                                                {/* Letter header */}
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
                                                     <div style={{
                                                         width: 36,
@@ -188,7 +185,6 @@ export default function ScrapbookPage() {
                                                     </div>
                                                 </div>
 
-                                                {/* Subject */}
                                                 {letter.subject && (
                                                     <div style={{
                                                         fontSize: '1rem',
@@ -200,7 +196,6 @@ export default function ScrapbookPage() {
                                                     </div>
                                                 )}
 
-                                                {/* Preview or full content */}
                                                 {!isExpanded ? (
                                                     <div style={{
                                                         fontSize: '0.9rem',
@@ -215,7 +210,6 @@ export default function ScrapbookPage() {
                                                     </div>
                                                 ) : (
                                                     <div style={{ marginTop: 16 }}>
-                                                        {/* Full letter */}
                                                         <div style={{
                                                             background: 'var(--bg-secondary)',
                                                             padding: 20,
@@ -229,7 +223,6 @@ export default function ScrapbookPage() {
                                                             {letter.body_text}
                                                         </div>
 
-                                                        {/* Santa's reply if exists */}
                                                         {letter.santa_reply && (
                                                             <div style={{ marginTop: 16 }}>
                                                                 <h4 style={{
@@ -240,7 +233,7 @@ export default function ScrapbookPage() {
                                                                     alignItems: 'center',
                                                                     gap: 8
                                                                 }}>
-                                                                    🎅 Santa's Reply
+                                                                    🎅 {t('scrapbook.santaReply')}
                                                                 </h4>
                                                                 <div style={{
                                                                     background: 'rgba(200, 50, 50, 0.08)',
@@ -257,7 +250,6 @@ export default function ScrapbookPage() {
                                                             </div>
                                                         )}
 
-                                                        {/* Wishes from this letter */}
                                                         {letter.wish_items && letter.wish_items.length > 0 && (
                                                             <div style={{ marginTop: 16 }}>
                                                                 <h4 style={{
@@ -265,7 +257,7 @@ export default function ScrapbookPage() {
                                                                     color: 'var(--text-muted)',
                                                                     marginBottom: 12
                                                                 }}>
-                                                                    🎁 Wishes
+                                                                    🎁 {t('scrapbook.wishes')}
                                                                 </h4>
                                                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                                                                     {letter.wish_items.map((item, idx) => (

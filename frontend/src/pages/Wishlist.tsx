@@ -1,20 +1,22 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useWishlistStore } from '../store/wishlistStore';
 import { useChildrenStore } from '../store/childrenStore';
 import { COUNTRIES } from '../constants/countries';
 
-const STATUS_LABELS: Record<string, { label: string; color: string; icon: string }> = {
-    pending: { label: 'Pending', color: 'var(--gold)', icon: '⏳' },
-    approved: { label: 'Approved', color: 'var(--green)', icon: '✅' },
-    denied: { label: 'Denied', color: 'var(--red)', icon: '❌' },
-    purchased: { label: 'Purchased', color: 'var(--accent)', icon: '🎁' },
-};
-
 export default function WishlistPage() {
+    const { t } = useTranslation();
     const { items, isLoading, fetchItems, updateItem } = useWishlistStore();
     const { children, fetchChildren } = useChildrenStore();
     const [selectedChild, setSelectedChild] = useState<number | undefined>();
     const [selectedStatus, setSelectedStatus] = useState<string>('');
+
+    const STATUS_LABELS: Record<string, { label: string; color: string; icon: string }> = {
+        pending: { label: t('wishlist.pending'), color: 'var(--gold)', icon: '⏳' },
+        approved: { label: t('wishlist.approved'), color: 'var(--green)', icon: '✅' },
+        denied: { label: t('wishlist.denied'), color: 'var(--red)', icon: '❌' },
+        purchased: { label: t('wishlist.purchased'), color: 'var(--accent)', icon: '🎁' },
+    };
 
     useEffect(() => {
         fetchChildren();
@@ -42,7 +44,7 @@ export default function WishlistPage() {
             <div className="page-header" style={{ marginBottom: 24, padding: 0, border: 'none', background: 'transparent' }}>
                 <h1 className="page-title">
                     <span className="title-icon">🎁</span>
-                    Wishlist
+                    {t('wishlist.title')}
                 </h1>
                 {totalBudget > 0 && (
                     <div style={{
@@ -51,7 +53,7 @@ export default function WishlistPage() {
                         borderRadius: 8,
                         border: '1px solid var(--border-secondary)'
                     }}>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Estimated Budget: </span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{t('wishlist.estimatedBudget')} </span>
                         <span style={{ color: 'var(--gold)', fontWeight: 600 }}>${totalBudget.toFixed(2)}</span>
                     </div>
                 )}
@@ -62,14 +64,14 @@ export default function WishlistPage() {
                 <div className="card-body" style={{ padding: '12px 20px' }}>
                     <div className="filter-row" style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
                         <div className="filter-item" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Child:</label>
+                            <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{t('wishlist.child')}</label>
                             <select
                                 className="form-input"
                                 style={{ width: 'auto', padding: '6px 12px' }}
                                 value={selectedChild || ''}
                                 onChange={(e) => setSelectedChild(e.target.value ? parseInt(e.target.value) : undefined)}
                             >
-                                <option value="">All Children</option>
+                                <option value="">{t('common.allChildren')}</option>
                                 {children.map(child => (
                                     <option key={child.id} value={child.id}>{child.name}</option>
                                 ))}
@@ -77,23 +79,23 @@ export default function WishlistPage() {
                         </div>
 
                         <div className="filter-item" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Status:</label>
+                            <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{t('wishlist.status')}</label>
                             <select
                                 className="form-input"
                                 style={{ width: 'auto', padding: '6px 12px' }}
                                 value={selectedStatus}
                                 onChange={(e) => setSelectedStatus(e.target.value)}
                             >
-                                <option value="">All Statuses</option>
-                                <option value="pending">Pending</option>
-                                <option value="approved">Approved</option>
-                                <option value="denied">Denied</option>
-                                <option value="purchased">Purchased</option>
+                                <option value="">{t('common.allStatuses')}</option>
+                                <option value="pending">{t('wishlist.pending')}</option>
+                                <option value="approved">{t('wishlist.approved')}</option>
+                                <option value="denied">{t('wishlist.denied')}</option>
+                                <option value="purchased">{t('wishlist.purchased')}</option>
                             </select>
                         </div>
 
                         <div className="filter-count" style={{ marginLeft: 'auto', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                            {items.length} item{items.length !== 1 ? 's' : ''}
+                            {items.length} {items.length !== 1 ? t('common.items') : t('common.item')}
                         </div>
                     </div>
                 </div>
@@ -109,8 +111,8 @@ export default function WishlistPage() {
                     <div className="card-body">
                         <div className="empty-state">
                             <div className="empty-state-icon">🎁</div>
-                            <h3>No wishes yet</h3>
-                            <p>When children send letters to Santa, their wishes will appear here!</p>
+                            <h3>{t('wishlist.noWishesYet')}</h3>
+                            <p>{t('wishlist.noWishesDesc')}</p>
                         </div>
                     </div>
                 </div>
@@ -179,10 +181,10 @@ export default function WishlistPage() {
                                             value={item.status}
                                             onChange={(e) => handleStatusChange(item.id, e.target.value)}
                                         >
-                                            <option value="pending">⏳ Pending</option>
-                                            <option value="approved">✅ Approved</option>
-                                            <option value="denied">❌ Denied</option>
-                                            <option value="purchased">🎁 Purchased</option>
+                                            <option value="pending">⏳ {t('wishlist.pending')}</option>
+                                            <option value="approved">✅ {t('wishlist.approved')}</option>
+                                            <option value="denied">❌ {t('wishlist.denied')}</option>
+                                            <option value="purchased">🎁 {t('wishlist.purchased')}</option>
                                         </select>
 
                                         {item.product_url && (
@@ -192,7 +194,7 @@ export default function WishlistPage() {
                                                 rel="noopener noreferrer"
                                                 className="btn btn-sm btn-secondary"
                                             >
-                                                🔗 View
+                                                🔗 {t('wishlist.view')}
                                             </a>
                                         )}
                                     </div>
@@ -202,7 +204,7 @@ export default function WishlistPage() {
                                             <input
                                                 type="text"
                                                 className="form-input"
-                                                placeholder="Reason for denying..."
+                                                placeholder={t('wishlist.reasonForDenying')}
                                                 style={{ fontSize: '0.85rem', padding: '6px 10px' }}
                                                 defaultValue={item.denial_reason || ''}
                                                 onBlur={(e) => {

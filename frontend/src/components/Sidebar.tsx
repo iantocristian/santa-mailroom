@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/authStore';
 import { useNotificationsStore } from '../store/notificationsStore';
 
@@ -8,23 +9,24 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen = true, onClose = () => { } }: SidebarProps) {
+    const { t } = useTranslation();
     const location = useLocation();
     const { user, logout } = useAuthStore();
     const { unreadCount } = useNotificationsStore();
 
     const navItems = [
-        { path: '/', icon: '🏠', label: 'Dashboard' },
-        { path: '/children', icon: '👧', label: 'Children' },
-        { path: '/wishlist', icon: '🎁', label: 'Wishlist' },
-        { path: '/letters', icon: '✉️', label: 'Letters' },
-        { path: '/timeline', icon: '📖', label: 'Scrapbook' },
-        { path: '/deeds', icon: '⭐', label: 'Good Deeds' },
-        { path: '/sent-emails', icon: '📤', label: 'Sent Emails' },
+        { path: '/', icon: '🏠', label: t('sidebar.dashboard') },
+        { path: '/children', icon: '👧', label: t('sidebar.children') },
+        { path: '/wishlist', icon: '🎁', label: t('sidebar.wishlist') },
+        { path: '/letters', icon: '✉️', label: t('sidebar.letters') },
+        { path: '/timeline', icon: '📖', label: t('sidebar.scrapbook') },
+        { path: '/deeds', icon: '⭐', label: t('sidebar.goodDeeds') },
+        { path: '/sent-emails', icon: '📤', label: t('sidebar.sentEmails') },
     ];
 
     const settingsItems = [
-        { path: '/moderation', icon: '🛡️', label: 'Moderation', badge: unreadCount > 0 ? undefined : undefined },
-        { path: '/settings', icon: '⚙️', label: 'Settings' },
+        { path: '/moderation', icon: '🛡️', label: t('sidebar.moderation'), badge: unreadCount > 0 ? undefined : undefined },
+        { path: '/settings', icon: '⚙️', label: t('sidebar.settings') },
     ];
 
     const isActive = (path: string) => location.pathname === path;
@@ -41,13 +43,13 @@ export default function Sidebar({ isOpen = true, onClose = () => { } }: SidebarP
                 <div className="sidebar-header">
                     <div className="sidebar-logo">
                         <span className="logo-icon">🎅</span>
-                        <span>Santa's Mailroom</span>
+                        <span>{t('sidebar.appName')}</span>
                     </div>
                 </div>
 
                 <nav className="sidebar-nav">
                     <div className="nav-section">
-                        <div className="nav-section-title">Main</div>
+                        <div className="nav-section-title">{t('sidebar.main')}</div>
                         {navItems.map((item) => (
                             <Link
                                 key={item.path}
@@ -62,7 +64,7 @@ export default function Sidebar({ isOpen = true, onClose = () => { } }: SidebarP
                     </div>
 
                     <div className="nav-section">
-                        <div className="nav-section-title">Manage</div>
+                        <div className="nav-section-title">{t('sidebar.manage')}</div>
                         {settingsItems.map((item) => (
                             <Link
                                 key={item.path}
@@ -82,7 +84,7 @@ export default function Sidebar({ isOpen = true, onClose = () => { } }: SidebarP
                         {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || '?'}
                     </div>
                     <div className="user-info">
-                        <div className="user-name">{user?.name || 'Parent'}</div>
+                        <div className="user-name">{user?.name || t('sidebar.parent')}</div>
                         <div className="user-email">{user?.email}</div>
                     </div>
                     <button className="logout-btn" onClick={logout} title="Logout">

@@ -1,8 +1,10 @@
 import { useState, useEffect, FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDeedsStore } from '../store/deedsStore';
 import { useChildrenStore } from '../store/childrenStore';
 
 export default function GoodDeedsPage() {
+    const { t } = useTranslation();
     const { deeds, isLoading, fetchDeeds, createDeed, completeDeed, deleteDeed } = useDeedsStore();
     const { children, fetchChildren } = useChildrenStore();
     const [selectedChild, setSelectedChild] = useState<number | undefined>();
@@ -60,10 +62,10 @@ export default function GoodDeedsPage() {
             <div className="page-header" style={{ marginBottom: 24, padding: 0, border: 'none', background: 'transparent' }}>
                 <h1 className="page-title">
                     <span className="title-icon">⭐</span>
-                    Good Deeds Tracker
+                    {t('goodDeeds.title')}
                 </h1>
                 <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-                    + Add Deed
+                    + {t('goodDeeds.addDeed')}
                 </button>
             </div>
 
@@ -72,14 +74,14 @@ export default function GoodDeedsPage() {
                 <div className="card-body" style={{ padding: '12px 20px' }}>
                     <div className="filter-row" style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
                         <div className="filter-item" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Child:</label>
+                            <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{t('goodDeeds.child')}</label>
                             <select
                                 className="form-input"
                                 style={{ width: 'auto', padding: '6px 12px' }}
                                 value={selectedChild || ''}
                                 onChange={(e) => setSelectedChild(e.target.value ? parseInt(e.target.value) : undefined)}
                             >
-                                <option value="">All Children</option>
+                                <option value="">{t('common.allChildren')}</option>
                                 {children.map(child => (
                                     <option key={child.id} value={child.id}>{child.name}</option>
                                 ))}
@@ -87,7 +89,7 @@ export default function GoodDeedsPage() {
                         </div>
 
                         <div className="filter-item" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Status:</label>
+                            <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{t('wishlist.status')}</label>
                             <select
                                 className="form-input"
                                 style={{ width: 'auto', padding: '6px 12px' }}
@@ -98,13 +100,13 @@ export default function GoodDeedsPage() {
                                 }}
                             >
                                 <option value="">All</option>
-                                <option value="pending">Pending</option>
-                                <option value="completed">Completed</option>
+                                <option value="pending">{t('wishlist.pending')}</option>
+                                <option value="completed">{t('goodDeeds.completed')}</option>
                             </select>
                         </div>
 
                         <div className="filter-count" style={{ marginLeft: 'auto', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                            {pendingDeeds.length} pending, {completedDeeds.length} completed
+                            {pendingDeeds.length} {t('goodDeeds.pending')}, {completedDeeds.length} {t('goodDeeds.completed')}
                         </div>
                     </div>
                 </div>
@@ -120,21 +122,20 @@ export default function GoodDeedsPage() {
                     <div className="card-body">
                         <div className="empty-state">
                             <div className="empty-state-icon">⭐</div>
-                            <h3>No good deeds yet</h3>
-                            <p>Santa will suggest good deeds in his replies, or you can add your own!</p>
+                            <h3>{t('goodDeeds.noGoodDeedsYet')}</h3>
+                            <p>{t('goodDeeds.noGoodDeedsDesc')}</p>
                             <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-                                Add a Good Deed
+                                {t('goodDeeds.addGoodDeed')}
                             </button>
                         </div>
                     </div>
                 </div>
             ) : (
                 <div style={{ display: 'grid', gap: 24 }}>
-                    {/* Pending Section */}
                     {pendingDeeds.length > 0 && (
                         <div>
                             <h2 style={{ fontSize: '1.1rem', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <span>⏳</span> Pending Deeds ({pendingDeeds.length})
+                                <span>⏳</span> {t('goodDeeds.pendingDeeds', { count: pendingDeeds.length })}
                             </h2>
                             <div style={{ display: 'grid', gap: 12 }}>
                                 {pendingDeeds.map(deed => (
@@ -168,7 +169,7 @@ export default function GoodDeedsPage() {
                                                         className="btn btn-sm btn-primary"
                                                         onClick={() => setShowCompleteModal(deed.id)}
                                                     >
-                                                        ✓ Complete
+                                                        ✓ {t('goodDeeds.complete')}
                                                     </button>
                                                     <button
                                                         className="btn btn-sm btn-secondary"
@@ -185,11 +186,10 @@ export default function GoodDeedsPage() {
                         </div>
                     )}
 
-                    {/* Completed Section */}
                     {completedDeeds.length > 0 && (
                         <div>
                             <h2 style={{ fontSize: '1.1rem', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <span>✅</span> Completed Deeds ({completedDeeds.length})
+                                <span>✅</span> {t('goodDeeds.completedDeeds', { count: completedDeeds.length })}
                             </h2>
                             <div style={{ display: 'grid', gap: 12 }}>
                                 {completedDeeds.map(deed => (
@@ -252,30 +252,30 @@ export default function GoodDeedsPage() {
                 <div className="modal-overlay" onClick={() => setShowModal(false)}>
                     <div className="modal" onClick={e => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2>Add Good Deed</h2>
+                            <h2>{t('goodDeeds.addGoodDeedTitle')}</h2>
                             <button className="btn btn-icon" onClick={() => setShowModal(false)}>✕</button>
                         </div>
                         <form onSubmit={handleCreateDeed}>
                             <div className="modal-body">
                                 <div className="form-group">
-                                    <label className="form-label">Child *</label>
+                                    <label className="form-label">{t('goodDeeds.child')}</label>
                                     <select
                                         className="form-input"
                                         value={newDeed.child_id || ''}
                                         onChange={(e) => setNewDeed({ ...newDeed, child_id: parseInt(e.target.value) || 0 })}
                                         required
                                     >
-                                        <option value="">Select a child...</option>
+                                        <option value="">{t('goodDeeds.selectChild')}</option>
                                         {children.map(child => (
                                             <option key={child.id} value={child.id}>{child.name}</option>
                                         ))}
                                     </select>
                                 </div>
                                 <div className="form-group">
-                                    <label className="form-label">Good Deed Description *</label>
+                                    <label className="form-label">{t('goodDeeds.deedDescription')}</label>
                                     <textarea
                                         className="form-input"
-                                        placeholder="e.g., Help mom with the dishes"
+                                        placeholder={t('goodDeeds.deedPlaceholder')}
                                         value={newDeed.description}
                                         onChange={(e) => setNewDeed({ ...newDeed, description: e.target.value })}
                                         rows={3}
@@ -285,10 +285,10 @@ export default function GoodDeedsPage() {
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
-                                    Cancel
+                                    {t('common.cancel')}
                                 </button>
                                 <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-                                    {isSubmitting ? 'Adding...' : 'Add Deed'}
+                                    {isSubmitting ? t('goodDeeds.adding') : t('goodDeeds.addDeed')}
                                 </button>
                             </div>
                         </form>
@@ -301,18 +301,18 @@ export default function GoodDeedsPage() {
                 <div className="modal-overlay" onClick={() => setShowCompleteModal(null)}>
                     <div className="modal" onClick={e => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2>🎉 Mark as Complete</h2>
+                            <h2>🎉 {t('goodDeeds.markAsComplete')}</h2>
                             <button className="btn btn-icon" onClick={() => setShowCompleteModal(null)}>✕</button>
                         </div>
                         <div className="modal-body">
                             <p style={{ marginBottom: 16 }}>
-                                Great job! Add an optional note about how it went:
+                                {t('goodDeeds.greatJob')}
                             </p>
                             <div className="form-group">
-                                <label className="form-label">Parent Note (optional)</label>
+                                <label className="form-label">{t('goodDeeds.parentNote')}</label>
                                 <textarea
                                     className="form-input"
-                                    placeholder="e.g., Did a great job helping!"
+                                    placeholder={t('goodDeeds.notePlaceholder')}
                                     value={completeNote}
                                     onChange={(e) => setCompleteNote(e.target.value)}
                                     rows={3}
@@ -321,10 +321,10 @@ export default function GoodDeedsPage() {
                         </div>
                         <div className="modal-footer">
                             <button className="btn btn-secondary" onClick={() => setShowCompleteModal(null)}>
-                                Cancel
+                                {t('common.cancel')}
                             </button>
                             <button className="btn btn-primary" onClick={handleComplete} disabled={isSubmitting}>
-                                {isSubmitting ? 'Saving...' : '✓ Mark Complete'}
+                                {isSubmitting ? t('goodDeeds.saving') : `✓ ${t('goodDeeds.markComplete')}`}
                             </button>
                         </div>
                     </div>

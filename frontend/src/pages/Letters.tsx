@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLettersStore } from '../store/lettersStore';
 import { useChildrenStore } from '../store/childrenStore';
 
 export default function LettersPage() {
+    const { t } = useTranslation();
     const { letters, isLoading, fetchLetters } = useLettersStore();
     const { children, fetchChildren } = useChildrenStore();
     const [selectedChild, setSelectedChild] = useState<number | undefined>();
@@ -33,11 +35,11 @@ export default function LettersPage() {
 
     const getStatusBadge = (status: string) => {
         const statusMap: Record<string, { label: string; color: string }> = {
-            pending: { label: 'Pending', color: 'var(--gold)' },
-            processing: { label: 'Processing', color: 'var(--accent)' },
-            processed: { label: 'Processed', color: 'var(--green)' },
-            replied: { label: 'Replied', color: 'var(--green)' },
-            failed: { label: 'Failed', color: 'var(--red)' },
+            pending: { label: t('letters.pending'), color: 'var(--gold)' },
+            processing: { label: t('letters.processing'), color: 'var(--accent)' },
+            processed: { label: t('letters.processed'), color: 'var(--green)' },
+            replied: { label: t('letters.replied'), color: 'var(--green)' },
+            failed: { label: t('letters.failed'), color: 'var(--red)' },
         };
         const info = statusMap[status] || statusMap.pending;
         return (
@@ -63,7 +65,7 @@ export default function LettersPage() {
             <div className="page-header" style={{ marginBottom: 24, padding: 0, border: 'none', background: 'transparent' }}>
                 <h1 className="page-title">
                     <span className="title-icon">✉️</span>
-                    Letters to Santa
+                    {t('letters.title')}
                 </h1>
             </div>
 
@@ -72,14 +74,14 @@ export default function LettersPage() {
                 <div className="card-body" style={{ padding: '12px 20px' }}>
                     <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>From:</label>
+                            <label style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{t('letters.from')}</label>
                             <select
                                 className="form-input"
                                 style={{ width: 'auto', padding: '6px 12px' }}
                                 value={selectedChild || ''}
                                 onChange={(e) => setSelectedChild(e.target.value ? parseInt(e.target.value) : undefined)}
                             >
-                                <option value="">All Children</option>
+                                <option value="">{t('common.allChildren')}</option>
                                 {children.map(child => (
                                     <option key={child.id} value={child.id}>{child.name}</option>
                                 ))}
@@ -87,7 +89,7 @@ export default function LettersPage() {
                         </div>
 
                         <div style={{ marginLeft: 'auto', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                            {letters.length} letter{letters.length !== 1 ? 's' : ''}
+                            {letters.length} {letters.length !== 1 ? t('common.letters') : t('common.letter')}
                         </div>
                     </div>
                 </div>
@@ -103,8 +105,8 @@ export default function LettersPage() {
                     <div className="card-body">
                         <div className="empty-state">
                             <div className="empty-state-icon">✉️</div>
-                            <h3>No letters yet</h3>
-                            <p>When children email Santa, their letters will appear here!</p>
+                            <h3>{t('letters.noLettersYet')}</h3>
+                            <p>{t('letters.noLettersDesc')}</p>
                         </div>
                     </div>
                 </div>
@@ -122,7 +124,6 @@ export default function LettersPage() {
                                     transition: 'border-color 0.2s'
                                 }}
                             >
-                                {/* Letter Header - Always visible */}
                                 <div
                                     className="card-body"
                                     style={{ padding: '14px 18px', cursor: 'pointer' }}
@@ -182,13 +183,11 @@ export default function LettersPage() {
                                     </div>
                                 </div>
 
-                                {/* Expanded Content */}
                                 {isExpanded && (
                                     <div style={{
                                         borderTop: '1px solid var(--border-secondary)',
                                         padding: '20px 18px'
                                     }}>
-                                        {/* Letter Body */}
                                         <div style={{
                                             background: 'var(--bg-secondary)',
                                             padding: 20,
@@ -201,11 +200,10 @@ export default function LettersPage() {
                                             {letter.body_text}
                                         </div>
 
-                                        {/* Santa's Reply */}
                                         {letter.santa_reply && (
                                             <div style={{ marginTop: 24 }}>
                                                 <h3 style={{ fontSize: '1rem', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                                                    🎅 Santa's Reply
+                                                    🎅 {t('letters.santaReply')}
                                                     {letter.santa_reply.delivery_status === 'sent' && (
                                                         <span style={{
                                                             fontSize: '0.75rem',
@@ -214,7 +212,7 @@ export default function LettersPage() {
                                                             background: 'var(--green)20',
                                                             color: 'var(--green)'
                                                         }}>
-                                                            ✅ Sent
+                                                            ✅ {t('letters.sent')}
                                                         </span>
                                                     )}
                                                 </h3>
@@ -233,11 +231,10 @@ export default function LettersPage() {
                                             </div>
                                         )}
 
-                                        {/* Wishes */}
                                         {letter.wish_items && letter.wish_items.length > 0 && (
                                             <div style={{ marginTop: 24 }}>
                                                 <h3 style={{ fontSize: '1rem', marginBottom: 12 }}>
-                                                    🎁 Wishes from this letter ({letter.wish_items.length})
+                                                    🎁 {t('letters.wishesFromLetter', { count: letter.wish_items.length })}
                                                 </h3>
                                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                                                     {letter.wish_items.map((item, idx) => (
@@ -258,11 +255,10 @@ export default function LettersPage() {
                                             </div>
                                         )}
 
-                                        {/* Moderation Flags */}
                                         {letter.moderation_flags && letter.moderation_flags.length > 0 && (
                                             <div style={{ marginTop: 24 }}>
                                                 <h3 style={{ fontSize: '1rem', marginBottom: 12, color: 'var(--red)' }}>
-                                                    ⚠️ Moderation Flags
+                                                    ⚠️ {t('letters.moderationFlags')}
                                                 </h3>
                                                 {letter.moderation_flags.map((flag, idx) => (
                                                     <div

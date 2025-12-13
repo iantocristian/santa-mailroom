@@ -1,8 +1,11 @@
 import { useState, useEffect, FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFamilyStore } from '../store/familyStore';
+import { supportedLanguages } from '../i18n';
 import type { Family } from '../types';
 
 export default function SettingsPage() {
+    const { t, i18n } = useTranslation();
     const { family, fetchFamily, updateFamily, createFamily } = useFamilyStore();
     const [formData, setFormData] = useState({
         name: '',
@@ -55,13 +58,17 @@ export default function SettingsPage() {
                 await createFamily(formData.name);
             }
 
-            setMessage({ type: 'success', text: 'Settings saved successfully!' });
+            setMessage({ type: 'success', text: t('settings.savedSuccess') });
         } catch (err: unknown) {
             const error = err as { response?: { data?: { detail?: string } } };
-            setMessage({ type: 'error', text: error.response?.data?.detail || 'Failed to save settings' });
+            setMessage({ type: 'error', text: error.response?.data?.detail || t('settings.saveFailed') });
         } finally {
             setIsSaving(false);
         }
+    };
+
+    const handleLanguageChange = (langCode: string) => {
+        i18n.changeLanguage(langCode);
     };
 
     return (
@@ -69,22 +76,49 @@ export default function SettingsPage() {
             <div className="page-header" style={{ marginBottom: 32, padding: 0, border: 'none', background: 'transparent' }}>
                 <h1 className="page-title">
                     <span className="title-icon">⚙️</span>
-                    Settings
+                    {t('settings.title')}
                 </h1>
             </div>
 
             <div style={{ maxWidth: 600 }}>
                 <form onSubmit={handleSubmit}>
-                    {/* Family Info */}
+                    {/* UI Language */}
                     <div className="card" style={{ marginBottom: 24 }}>
                         <div className="card-header">
                             <h2 className="card-title">
-                                <span>👨‍👩‍👧‍👦</span> Family Information
+                                <span>🌍</span> {t('settings.language')}
                             </h2>
                         </div>
                         <div className="card-body">
                             <div className="form-group">
-                                <label className="form-label">Family Name</label>
+                                <select
+                                    className="form-input"
+                                    value={i18n.language}
+                                    onChange={(e) => handleLanguageChange(e.target.value)}
+                                >
+                                    {supportedLanguages.map(lang => (
+                                        <option key={lang.code} value={lang.code}>
+                                            {lang.native} ({lang.name})
+                                        </option>
+                                    ))}
+                                </select>
+                                <small style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                                    {t('settings.languageHint')}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Family Info */}
+                    <div className="card" style={{ marginBottom: 24 }}>
+                        <div className="card-header">
+                            <h2 className="card-title">
+                                <span>👨‍👩‍👧‍👦</span> {t('settings.familyInfo')}
+                            </h2>
+                        </div>
+                        <div className="card-body">
+                            <div className="form-group">
+                                <label className="form-label">{t('settings.familyName')}</label>
                                 <input
                                     type="text"
                                     className="form-input"
@@ -95,7 +129,7 @@ export default function SettingsPage() {
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Timezone</label>
+                                <label className="form-label">{t('settings.timezone')}</label>
                                 <select
                                     className="form-input"
                                     value={formData.timezone}
@@ -120,12 +154,12 @@ export default function SettingsPage() {
                     <div className="card" style={{ marginBottom: 24 }}>
                         <div className="card-header">
                             <h2 className="card-title">
-                                <span>💰</span> Budget Alerts
+                                <span>💰</span> {t('settings.budgetAlerts')}
                             </h2>
                         </div>
                         <div className="card-body">
                             <div className="form-group">
-                                <label className="form-label">Budget Alert Threshold ($)</label>
+                                <label className="form-label">{t('settings.budgetThreshold')}</label>
                                 <input
                                     type="number"
                                     className="form-input"
@@ -136,7 +170,7 @@ export default function SettingsPage() {
                                     step="0.01"
                                 />
                                 <small style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                                    You'll be notified when the total wishlist exceeds this amount. Leave empty to disable.
+                                    {t('settings.budgetThresholdHint')}
                                 </small>
                             </div>
                         </div>
@@ -146,23 +180,23 @@ export default function SettingsPage() {
                     <div className="card" style={{ marginBottom: 24 }}>
                         <div className="card-header">
                             <h2 className="card-title">
-                                <span>🛡️</span> Content Moderation
+                                <span>🛡️</span> {t('settings.contentModeration')}
                             </h2>
                         </div>
                         <div className="card-body">
                             <div className="form-group">
-                                <label className="form-label">Moderation Sensitivity</label>
+                                <label className="form-label">{t('settings.moderationSensitivity')}</label>
                                 <select
                                     className="form-input"
                                     value={formData.moderation_strictness}
                                     onChange={(e) => setFormData({ ...formData, moderation_strictness: e.target.value })}
                                 >
-                                    <option value="low">Low - Only flag serious concerns</option>
-                                    <option value="medium">Medium - Flag concerning content (Recommended)</option>
-                                    <option value="high">High - Flag anything that might indicate struggles</option>
+                                    <option value="low">{t('settings.moderationLow')}</option>
+                                    <option value="medium">{t('settings.moderationMedium')}</option>
+                                    <option value="high">{t('settings.moderationHigh')}</option>
                                 </select>
                                 <small style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                                    Controls how sensitive the AI is when detecting concerning content in letters.
+                                    {t('settings.moderationHint')}
                                 </small>
                             </div>
                         </div>
@@ -172,12 +206,12 @@ export default function SettingsPage() {
                     <div className="card" style={{ marginBottom: 24 }}>
                         <div className="card-header">
                             <h2 className="card-title">
-                                <span>🔒</span> Data & Privacy
+                                <span>🔒</span> {t('settings.dataPrivacy')}
                             </h2>
                         </div>
                         <div className="card-body">
                             <div className="form-group">
-                                <label className="form-label">Data Retention (Years)</label>
+                                <label className="form-label">{t('settings.dataRetention')}</label>
                                 <input
                                     type="number"
                                     className="form-input"
@@ -187,7 +221,7 @@ export default function SettingsPage() {
                                     max="10"
                                 />
                                 <small style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                                    How long to keep letters and wishes. Older data will be automatically deleted.
+                                    {t('settings.dataRetentionHint')}
                                 </small>
                             </div>
                         </div>
@@ -204,7 +238,7 @@ export default function SettingsPage() {
                     )}
 
                     <button type="submit" className="btn btn-primary btn-lg" disabled={isSaving}>
-                        {isSaving ? 'Saving...' : '💾 Save Settings'}
+                        {isSaving ? t('settings.saving') : `💾 ${t('settings.saveSettings')}`}
                     </button>
                 </form>
             </div>

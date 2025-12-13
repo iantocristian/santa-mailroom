@@ -1,8 +1,10 @@
 import { useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/authStore';
 
 export default function Login() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -18,7 +20,7 @@ export default function Login() {
       await login(email, password);
     } catch (err: unknown) {
       const error = err as { response?: { data?: { detail?: string } } };
-      setError(error.response?.data?.detail || 'Failed to login. Please try again.');
+      setError(error.response?.data?.detail || t('auth.loginFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -30,16 +32,16 @@ export default function Login() {
         <div className="auth-header">
           <div className="auth-logo">
             <span className="logo-icon">🎅</span>
-            <span className="logo-text">Santa's Mailroom</span>
+            <span className="logo-text">{t('auth.appName')}</span>
           </div>
-          <p className="auth-subtitle">Welcome back to the North Pole!</p>
+          <p className="auth-subtitle">{t('auth.welcomeBack')}</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           {error && <div className="auth-error">{error}</div>}
 
           <div className="form-group">
-            <label className="form-label">Email</label>
+            <label className="form-label">{t('auth.email')}</label>
             <input
               type="email"
               className="form-input"
@@ -52,7 +54,7 @@ export default function Login() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Password</label>
+            <label className="form-label">{t('auth.password')}</label>
             <input
               type="password"
               className="form-input"
@@ -67,18 +69,18 @@ export default function Login() {
             {isLoading ? (
               <>
                 <span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} />
-                Entering the workshop...
+                {t('auth.enteringWorkshop')}
               </>
             ) : (
-              <>🎄 Sign In</>
+              <>🎄 {t('auth.signIn')}</>
             )}
           </button>
         </form>
 
         <p className="auth-footer">
-          Don't have an account?{' '}
+          {t('auth.noAccount')}{' '}
           <Link to="/register" className="auth-link">
-            Create one
+            {t('auth.createOne')}
           </Link>
         </p>
       </div>
