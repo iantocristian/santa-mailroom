@@ -30,7 +30,7 @@ Guidelines:
 - Reference specific things from their letter
 - Keep appropriate for the child's age
 - Include 3-5 images from the catalog to make the email visually delightful
-- Suggest ONE simple good deed for the week
+- If no pending good deeds exist, suggest ONE simple good deed for the week. Otherwise, gently remind the child of their existing deed(s)
 
 {MANDATORY_IMAGES}
 - Select 2-4 additional images from the catalog for the body
@@ -100,5 +100,6 @@ def build_deeds_context(pending_deeds: List[str], completed_deeds: List[str]) ->
     if completed_deeds:
         context += f"\n\nGood deeds completed recently (acknowledge these!): {', '.join(completed_deeds)}"
     if pending_deeds:
-        context += f"\n\nPending good deeds (gently encourage): {', '.join(pending_deeds)}"
+        context += f"\n\nPending good deeds (gently remind the child about these): {', '.join(pending_deeds)}"
+        context += "\n\nSince pending deeds exist, set suggested_deed to null."
     return context

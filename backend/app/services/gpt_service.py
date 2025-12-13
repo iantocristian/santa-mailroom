@@ -580,6 +580,77 @@ With love from the North Pole,
             logger.error(f"Error in email safety check: {e}")
             # On error, fail closed (block the email) for safety
             return False, f"Safety check system error: {str(e)}"
+    
+    def check_deed_similarity(self, new_deed: str, existing_deeds: List[str]) -> tuple[bool, Optional[str]]:
+        """
+        Check if a new deed suggestion is semantically similar to any existing deeds.
+        Uses GPT for intelligent comparison across languages and phrasings.
+        
+        Args:
+            new_deed: The newly suggested deed description
+            existing_deeds: List of existing pending deed descriptions
+            
+        Returns:
+            Tuple of (is_duplicate: bool, similar_deed: Optional[str])
+        """
+        if not existing_deeds:
+            return False, None
+        
+        system_prompt = """You are a task comparison assistant. Your job is to determine if a new task/deed is semantically equivalent to any existing tasks.
+
+Two tasks are considered DUPLICATE if they describe essentially the same activity, even if:
+- They are in different languages
+- They use different wording
+- One is more specific than the other
+
+Examples of DUPLICATES:
+- "Learn a poem for Christmas" and "Să înveți o poezie până la Crăciun" (same, different language)
+- "Help mom with dishes" and "Wash the dishes after dinner" (essentially same task)
+- "Read a book" and "Read a story before bed" (essentially same activity)
+
+Examples of NOT duplicates:
+- "Learn a poem" and "Write a poem" (different activities)
+- "Help with dishes" and "Help with laundry" (different chores)
+
+Respond with JSON:
+{
+  "is_duplicate": true/false,
+  "matching_task": "the existing task it matches (or null if no match)",
+  "reason": "brief explanation"
+}"""
+
+        existing_list = "\n".join(f"- {deed}" for deed in existing_deeds)
+        user_prompt = f"""New task being suggested:
+"{new_deed}"
+
+Existing pending tasks:
+{existing_list}
+
+Is the new task a duplicate of any existing task?"""
+
+        try:
+            response = self._chat(
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                model=self.extraction_model,  # Use faster model for this
+                response_format={"type": "json_object"}
+            )
+            
+            data = json.loads(response)
+            is_duplicate = data.get("is_duplicate", False)
+            matching_task = data.get("matching_task")
+            
+            if is_duplicate:
+                logger.info(f"Deed similarity check: '{new_deed}' matches existing '{matching_task}' - {data.get('reason', '')}")
+            
+            return is_duplicate, matching_task
+            
+        except Exception as e:
+            logger.error(f"Error in deed similarity check: {e}")
+            # On error, allow the deed (don't block on similarity check failure)
+            return False, None
 
 
 # Singleton instance

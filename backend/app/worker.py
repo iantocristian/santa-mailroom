@@ -339,14 +339,33 @@ def handle_process_letter(db: Session, payload: dict):
     
     logger.info(f"Generated rich email with {len(rich_email['images_used'])} images: {rich_email['images_used']}")
     
-    # Create good deed if suggested
+    # Create good deed if suggested (but avoid duplicates using semantic comparison)
     if rich_email["suggested_deed"]:
-        new_deed = GoodDeed(
-            child_id=child.id,
-            description=rich_email["suggested_deed"],
-            suggested_in_reply_id=santa_reply.id
-        )
-        db.add(new_deed)
+        # Check if a similar pending deed already exists for this child
+        existing_pending_deeds = db.query(GoodDeed).filter(
+            GoodDeed.child_id == child.id,
+            GoodDeed.completed == False
+        ).all()
+        
+        if existing_pending_deeds:
+            # Use GPT for semantic duplicate detection
+            existing_descriptions = [d.description for d in existing_pending_deeds]
+            is_duplicate, matching_deed = gpt_service.check_deed_similarity(
+                rich_email["suggested_deed"],
+                existing_descriptions
+            )
+        else:
+            is_duplicate = False
+        
+        if not is_duplicate:
+            new_deed = GoodDeed(
+                child_id=child.id,
+                description=rich_email["suggested_deed"],
+                suggested_in_reply_id=santa_reply.id
+            )
+            db.add(new_deed)
+        else:
+            logger.info(f"Skipping duplicate deed for child {child.id}: '{rich_email['suggested_deed']}'")
     
     # Mark completed deeds as acknowledged
     for deed in completed_deeds:
