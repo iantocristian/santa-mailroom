@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useFamilyStore } from '../store/familyStore';
 import { useChildrenStore } from '../store/childrenStore';
@@ -8,6 +8,7 @@ export default function Dashboard() {
     const { family, stats, fetchFamily, fetchStats } = useFamilyStore();
     const { children, fetchChildren } = useChildrenStore();
     const { notifications, fetchNotifications } = useNotificationsStore();
+    const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle');
 
     useEffect(() => {
         fetchFamily();
@@ -16,8 +17,29 @@ export default function Dashboard() {
         fetchNotifications();
     }, [fetchFamily, fetchStats, fetchChildren, fetchNotifications]);
 
-    const copyToClipboard = (text: string) => {
-        navigator.clipboard.writeText(text);
+    const copyToClipboard = async (text: string) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopyStatus('copied');
+            setTimeout(() => setCopyStatus('idle'), 2000);
+        } catch (err) {
+            // Fallback for browsers that don't support clipboard API
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                setCopyStatus('copied');
+                setTimeout(() => setCopyStatus('idle'), 2000);
+            } catch (e) {
+                setCopyStatus('error');
+                setTimeout(() => setCopyStatus('idle'), 2000);
+            }
+            document.body.removeChild(textArea);
+        }
     };
 
     return (
@@ -74,12 +96,21 @@ export default function Dashboard() {
                         onClick={() => copyToClipboard(family.santa_email || '')}
                         className="btn btn-primary"
                         style={{
-                            background: 'rgba(212, 175, 55, 0.2)',
-                            border: '1px solid #d4af37',
-                            color: '#d4af37'
+                            background: copyStatus === 'copied' ? 'rgba(34, 197, 94, 0.2)' :
+                                copyStatus === 'error' ? 'rgba(239, 68, 68, 0.2)' :
+                                    'rgba(212, 175, 55, 0.2)',
+                            border: copyStatus === 'copied' ? '1px solid #22c55e' :
+                                copyStatus === 'error' ? '1px solid #ef4444' :
+                                    '1px solid #d4af37',
+                            color: copyStatus === 'copied' ? '#22c55e' :
+                                copyStatus === 'error' ? '#ef4444' :
+                                    '#d4af37',
+                            transition: 'all 0.2s ease'
                         }}
                     >
-                        📋 Copy Email
+                        {copyStatus === 'copied' ? '✓ Copied!' :
+                            copyStatus === 'error' ? '⚠️ Failed' :
+                                '📋 Copy Email'}
                     </button>
                 </div>
             )}
