@@ -593,40 +593,13 @@ With love from the North Pole,
         Returns:
             Tuple of (is_duplicate: bool, similar_deed: Optional[str])
         """
+        from app.prompts import deed_similarity
+        
         if not existing_deeds:
             return False, None
         
-        system_prompt = """You are a task comparison assistant. Your job is to determine if a new task/deed is semantically equivalent to any existing tasks.
-
-Two tasks are considered DUPLICATE if they describe essentially the same activity, even if:
-- They are in different languages
-- They use different wording
-- One is more specific than the other
-
-Examples of DUPLICATES:
-- "Learn a poem for Christmas" and "Să înveți o poezie până la Crăciun" (same, different language)
-- "Help mom with dishes" and "Wash the dishes after dinner" (essentially same task)
-- "Read a book" and "Read a story before bed" (essentially same activity)
-
-Examples of NOT duplicates:
-- "Learn a poem" and "Write a poem" (different activities)
-- "Help with dishes" and "Help with laundry" (different chores)
-
-Respond with JSON:
-{
-  "is_duplicate": true/false,
-  "matching_task": "the existing task it matches (or null if no match)",
-  "reason": "brief explanation"
-}"""
-
-        existing_list = "\n".join(f"- {deed}" for deed in existing_deeds)
-        user_prompt = f"""New task being suggested:
-"{new_deed}"
-
-Existing pending tasks:
-{existing_list}
-
-Is the new task a duplicate of any existing task?"""
+        system_prompt = deed_similarity.DEED_SIMILARITY_SYSTEM
+        user_prompt = deed_similarity.get_deed_similarity_user(new_deed, existing_deeds)
 
         try:
             response = self._chat(
