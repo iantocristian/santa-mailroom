@@ -1,15 +1,16 @@
-# Santa Wishlist Application 🎅
+# Santa's Mailroom 🎅
 
-A magical Christmas wish list application where children email Santa and parents manage everything through a festive dashboard.
+A magical Christmas application where children email Santa and parents manage everything through a festive dashboard.
 
 ## Features
 
-- 📧 **Email Santa**: Children send wish lists to a dedicated email address
-- 🎁 **Wishlist Management**: Parents see extracted items with prices and links
-- ✨ **Good Deeds Tracker**: Santa suggests kind acts, parents mark completion
-- 🛡️ **Content Safety**: Automatic moderation flags concerning content
-- 📖 **Scrapbook View**: Year-by-year timeline of letters and wishes
-- 🔔 **Notifications**: Alerts for new letters, budget limits, and flags
+- 📧 **Email Santa** - Children send wish lists to a dedicated email address
+- 🎁 **Wishlist Management** - Parents see extracted items with prices
+- ✨ **Good Deeds Tracker** - Santa suggests kind acts, parents mark completion
+- 🛡️ **Content Safety** - Automatic moderation flags concerning content
+- 📖 **Scrapbook View** - Year-by-year timeline of letters and wishes
+- 📤 **Sent Emails** - View all Santa's outgoing emails
+- ❄️ **Festive UI** - Animated snowfall and Christmas theme
 
 ## Project Structure
 
@@ -18,18 +19,17 @@ santa/
 ├── backend/              # Python FastAPI backend
 │   ├── app/
 │   │   ├── routers/      # API routes
-│   │   ├── services/     # Business logic (email, GPT, etc.)
+│   │   ├── services/     # Business logic (email, GPT, search)
 │   │   ├── models.py     # SQLAlchemy models
 │   │   └── worker.py     # Background job worker
-│   ├── alembic/          # Database migrations
 │   └── requirements.txt
 │
 ├── frontend/             # React TypeScript frontend
 │   ├── src/
-│   │   ├── components/   # UI components
+│   │   ├── components/   # UI components (Sidebar, Snowfall)
 │   │   ├── pages/        # Route pages
 │   │   ├── store/        # Zustand stores
-│   │   └── styles/       # CSS styles
+│   │   └── styles/       # Christmas theme CSS
 │   └── package.json
 │
 └── docker-compose.yaml   # Container orchestration
@@ -42,34 +42,29 @@ santa/
 - Node.js 18+
 - PostgreSQL
 
-### 1. Setup PostgreSQL Database
+### 1. Database Setup
 
 ```sql
 CREATE DATABASE santa;
 ```
 
-### 2. Backend Setup
+### 2. Backend
 
 ```bash
 cd backend
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 
-# Copy example env and configure
 cp .env.example .env
 # Edit .env with your settings
 
-# Run migrations
-alembic upgrade head
-
-# Start the server
-python -m uvicorn app.main:app --reload
+uvicorn app.main:app --reload
 ```
 
-Backend runs at http://localhost:8000
+Backend: http://localhost:8000
 
-### 3. Frontend Setup
+### 3. Frontend
 
 ```bash
 cd frontend
@@ -77,86 +72,52 @@ npm install
 npm run dev
 ```
 
-Frontend runs at http://localhost:5173
+Frontend: http://localhost:5173
+
+### 4. Email Worker
+
+```bash
+cd backend
+source .venv/bin/activate
+python -m app.worker both
+```
 
 ## Configuration
 
-All configuration is via environment variables (`.env` file):
+All configuration via `.env` file:
 
-### Required Settings
+### Required
 
 | Variable | Description |
 |----------|-------------|
 | `DATABASE_URL` | PostgreSQL connection string |
 | `SECRET_KEY` | JWT signing key |
-| `OPENAI_API_KEY` | OpenAI API key for GPT features |
+| `OPENAI_API_KEY` | OpenAI API key |
 
-### Email Settings
+### Email (POP3 - Receiving)
 
 | Variable | Description |
 |----------|-------------|
-| `POP3_SERVER` | POP3 server for receiving emails |
-| `POP3_PORT` | POP3 port (default: 995) |
-| `POP3_USERNAME` | Email inbox username |
-| `POP3_PASSWORD` | Email inbox password |
-| `SMTP_SERVER` | SMTP server for sending replies |
-| `SMTP_PORT` | SMTP port (default: 587) |
-| `SMTP_USERNAME` | SMTP username |
-| `SMTP_PASSWORD` | SMTP password |
-| `SANTA_EMAIL_ADDRESS` | The "from" address for Santa's replies |
+| `POP3_SERVER` | POP3 server (e.g., `pop.gmail.com`) |
+| `POP3_PORT` | Port (default: 995) |
+| `POP3_USERNAME` | Email account |
+| `POP3_PASSWORD` | App password |
 
-### Optional Settings
+### Email (SMTP - Sending)
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `GPT_MODEL` | `gpt-4o` | Model for generating replies |
-
-## API Endpoints
-
-### Authentication
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Register new parent account |
-| POST | `/api/auth/login` | Login |
-| GET | `/api/auth/me` | Get current user |
-
-### Family & Children
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/family` | Get family settings |
-| PUT | `/api/family` | Update family settings |
-| GET | `/api/children` | List children |
-| POST | `/api/children` | Register a child |
-| PUT | `/api/children/{id}` | Update child |
-| DELETE | `/api/children/{id}` | Remove child |
-
-### Wishlist
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/wishlist` | List wish items (filterable) |
-| GET | `/api/wishlist/summary` | Budget/category summary |
-| PUT | `/api/wishlist/{id}` | Approve/deny item |
-
-### Letters & Timeline
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/letters` | List letters |
-| GET | `/api/letters/{id}` | Get letter with items and reply |
-| GET | `/api/letters/timeline` | Scrapbook view data |
-| POST | `/api/letters/{id}/export` | Export as PDF |
-
-### Good Deeds
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/deeds` | List good deeds |
-| POST | `/api/deeds` | Suggest new deed |
-| PUT | `/api/deeds/{id}/complete` | Mark as completed |
+| Variable | Description |
+|----------|-------------|
+| `SMTP_SERVER` | SMTP server (e.g., `smtp.gmail.com`) |
+| `SMTP_PORT` | Port (465 for SSL, 587 for TLS) |
+| `SMTP_USERNAME` | Email account |
+| `SMTP_PASSWORD` | App password |
+| `SANTA_EMAIL_ADDRESS` | Santa's "from" address |
 
 ## Architecture
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  Child's Email  │────▶│  POP3 Fetcher   │────▶│   Task Queue    │
+│  Child's Email  │────▶│  POP3 Fetcher   │────▶│   Job Queue     │
 └─────────────────┘     └─────────────────┘     └────────┬────────┘
                                                          │
                         ┌────────────────────────────────▼────────┐
@@ -174,10 +135,34 @@ All configuration is via environment variables (`.env` file):
 ┌─────────────────────────────────────────────────────────────────┐
 │                       Parent Dashboard                          │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────────┐ │
-│  │ Children │  │ Wishlist │  │  Deeds   │  │ Timeline/Letters │ │
+│  │ Children │  │ Wishlist │  │  Deeds   │  │ Scrapbook/Emails │ │
 │  └──────────┘  └──────────┘  └──────────┘  └──────────────────┘ │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+## API Endpoints
+
+### Auth
+- `POST /api/auth/register` - Register (requires invite token)
+- `POST /api/auth/login` - Login
+- `GET /api/auth/me` - Current user
+
+### Family & Children
+- `GET/PUT /api/family` - Family settings
+- `GET/POST/PUT/DELETE /api/children` - Child management
+
+### Content
+- `GET/PUT /api/wishlist` - Wish items
+- `GET /api/letters` - Letters and replies
+- `GET/POST /api/deeds` - Good deeds
+- `POST /api/deeds/{id}/complete` - Complete deed (sends email!)
+- `GET /api/sent-emails` - View all Santa emails
+
+## Documentation
+
+- [USER-GUIDE.md](./USER-GUIDE.md) - End user guide
+- [backend/README.md](./backend/README.md) - Backend details
+- [frontend/README.md](./frontend/README.md) - Frontend details
 
 ## License
 

@@ -1,35 +1,64 @@
-# BVBChat Frontend
+# Santa's Mailroom Frontend 🎅
 
-Stock Market Chat Assistant built with React, TypeScript, and Vite.
+React dashboard for parents to manage children's letters to Santa.
 
 ## Setup
 
-1. Install dependencies:
 ```bash
 npm install
-```
-
-2. Start the development server:
-```bash
 npm run dev
 ```
 
-The app will be available at http://localhost:5173
+The app runs at http://localhost:5173
 
 ## Features
 
-- 💬 ChatGPT-like interface for stock queries
-- 📈 Real-time stock charts using lightweight-charts
-- 🔐 User authentication (login/register)
-- 📱 Mobile-responsive design
-- 🌙 Dark trading terminal aesthetic
+- 🏠 **Dashboard** - Overview with stats, children cards, notifications
+- 👧 **Children** - Add/edit children profiles with email matching
+- 🎁 **Wishlist** - View extracted wishes with prices, approve/deny items
+- ✉️ **Letters** - Read all letters and Santa's replies
+- 📖 **Scrapbook** - Timeline view grouped by Christmas year
+- ⭐ **Good Deeds** - Track and complete good deeds
+- 📤 **Sent Emails** - View all Santa's outgoing emails
+- ⚙️ **Settings** - Family preferences, moderation strictness
 
 ## Tech Stack
 
 - React 18 + TypeScript
 - Vite for build tooling
 - Zustand for state management
-- Lightweight Charts for stock visualization
 - React Router for navigation
 - Axios for API calls
 
+## Pages
+
+| Page | Route | Description |
+|------|-------|-------------|
+| Dashboard | `/` | Stats and overview |
+| Children | `/children` | Manage children profiles |
+| Wishlist | `/wishlist` | Gift wishes with filters |
+| Letters | `/letters` | All letters and replies |
+| Scrapbook | `/timeline` | Year-by-year timeline |
+| Good Deeds | `/deeds` | Deed tracker |
+| Sent Emails | `/sent-emails` | All Santa's emails |
+| Settings | `/settings` | Family config |
+
+## Project Structure
+
+```
+src/
+├── api/           # Axios client
+├── components/    # Shared components (Sidebar, Snowfall)
+├── pages/         # Route pages
+├── store/         # Zustand state stores
+├── styles/        # CSS (Christmas theme)
+└── types/         # TypeScript interfaces
+```
+
+## Theme
+
+- 🌙 Dark cozy winter night aesthetic
+- ❄️ Animated snowfall effect
+- 🔴🟢🟡 Christmas color palette (red, green, gold)
+- ✨ Festive glow effects
+- 📱 Fully responsive

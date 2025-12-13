@@ -26,10 +26,9 @@ Welcome to Santa's Mailroom! This app helps parents manage their children's lett
 2. You'll need an **invite token** to register (ask the admin Cristian Ianto on slack for one)
 3. Once registered, a family is automatically created for you
 
-### Step 2: Set Up Your Santa Email
+### Step 2: Know Your Santa Email
 
 The app uses a dedicated email address `santaclausgotmail@gmail.com` to receive letters from your children. 
-
 Your children will write to this email address, and Santa will reply automatically!
 
 ---
