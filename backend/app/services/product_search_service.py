@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from openai import OpenAI
 
 from app.config import get_settings
+from app.prompts.product_search import get_product_search_prompt
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -59,35 +60,12 @@ class ProductSearchService:
             logger.warning("OpenAI API key not configured")
             return None
         
-        # Build child context for better product selection
-        child_context = ""
-        if child_name or child_age:
-            child_context = "\n\nChild context:"
-            if child_name:
-                child_context += f"\n- Name: {child_name} (infer likely gender from the name and {country} cultural context)"
-            if child_age:
-                child_context += f"\n- Age: {child_age} years old"
-            child_context += "\n\nIMPORTANT: Select a product variant appropriate for this child (e.g., boys/girls version, age-appropriate features, correct size range)."
-        
-        prompt = f"""Search for this gift item for a child and provide purchase information:
-        
-Product: {item_name}
-Country: {country}{child_context}
-
-Find:
-1. The exact product name as sold by a major retailer
-2. Current price in {country} currency
-3. A URL to purchase from a major retailer (Amazon, Target, Walmart, etc.)
-4. A brief parent-friendly description
-
-Respond with ONLY valid JSON in this exact format:
-{{
-  "name": "full product name",
-  "estimated_price": 29.99,
-  "currency": "USD",
-  "product_url": "https://...",
-  "description": "brief description"
-}}"""
+        prompt = get_product_search_prompt(
+            item_name=item_name,
+            country=country,
+            child_name=child_name,
+            child_age=child_age
+        )
 
         try:
             # Use Responses API with web_search tool
