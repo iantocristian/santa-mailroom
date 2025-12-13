@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.database import get_db
-from app.auth import get_current_user
+from app.auth import get_current_user, require_write_access
 from app.models import User, Family
 from app.schemas import FamilyResponse, FamilyUpdate, FamilyStats, FamilyCreate
 from app.config import get_settings
@@ -40,7 +40,7 @@ def get_family(
 @router.post("", response_model=FamilyResponse, status_code=status.HTTP_201_CREATED)
 def create_family(
     family_data: FamilyCreate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_write_access),
     db: Session = Depends(get_db)
 ):
     """Create a family for the current user."""
@@ -63,7 +63,7 @@ def create_family(
 @router.put("", response_model=FamilyResponse)
 def update_family(
     family_update: FamilyUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_write_access),
     db: Session = Depends(get_db)
 ):
     """Update family settings."""

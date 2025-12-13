@@ -62,3 +62,18 @@ async def get_current_user(
         raise credentials_exception
     return user
 
+
+async def require_write_access(
+    current_user: User = Depends(get_current_user)
+) -> User:
+    """Ensure the current user has write access (not read-only).
+    
+    Use this dependency on any endpoint that modifies data (POST, PUT, DELETE).
+    Read-only users will receive a 403 Forbidden response.
+    """
+    if current_user.is_readonly:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is read-only. Data modification is not allowed."
+        )
+    return current_user

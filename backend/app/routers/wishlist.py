@@ -4,7 +4,7 @@ from typing import List, Optional
 from sqlalchemy import func
 
 from app.database import get_db
-from app.auth import get_current_user
+from app.auth import get_current_user, require_write_access
 from app.models import User, WishItem, Letter, Child
 from app.schemas import WishItemResponse, WishItemUpdate, WishlistSummary
 
@@ -161,7 +161,7 @@ def get_wish_item(
 def update_wish_item(
     item_id: int,
     item_update: WishItemUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_write_access),
     db: Session = Depends(get_db)
 ):
     """Update a wish item (approve/deny - reality filter)."""

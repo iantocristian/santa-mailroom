@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from app.database import get_db
-from app.auth import get_current_user
+from app.auth import get_current_user, require_write_access
 from app.models import User, Notification
 from app.schemas import NotificationResponse
 
@@ -70,7 +70,7 @@ def get_notification(
 @router.put("/{notification_id}/read", response_model=NotificationResponse)
 def mark_notification_read(
     notification_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_write_access),
     db: Session = Depends(get_db)
 ):
     """Mark a notification as read."""
@@ -94,7 +94,7 @@ def mark_notification_read(
 
 @router.post("/read-all")
 def mark_all_read(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_write_access),
     db: Session = Depends(get_db)
 ):
     """Mark all notifications as read."""
@@ -114,7 +114,7 @@ def mark_all_read(
 @router.delete("/{notification_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_notification(
     notification_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_write_access),
     db: Session = Depends(get_db)
 ):
     """Delete a notification."""

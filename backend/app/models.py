@@ -56,6 +56,7 @@ class User(Base):
     invite_code_id = Column(Integer, ForeignKey("invite_codes.id"), nullable=True)  # Link to invite code used
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    is_readonly = Column(Boolean, default=False, nullable=False)
 
     # Relationship to family
     family = relationship("Family", back_populates="owner", uselist=False)

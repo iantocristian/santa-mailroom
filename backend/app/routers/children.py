@@ -4,7 +4,7 @@ from typing import List
 import hashlib
 
 from app.database import get_db
-from app.auth import get_current_user
+from app.auth import get_current_user, require_write_access
 from app.models import User, Child, Letter, WishItem, GoodDeed
 from app.schemas import ChildCreate, ChildUpdate, ChildResponse, ChildWithStats
 
@@ -60,7 +60,7 @@ def list_children(
 @router.post("", response_model=ChildResponse, status_code=status.HTTP_201_CREATED)
 def create_child(
     child_data: ChildCreate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_write_access),
     db: Session = Depends(get_db)
 ):
     """Register a new child."""
@@ -136,6 +136,7 @@ def get_child(
         country=child.country,
         birth_year=child.birth_year,
         avatar_url=child.avatar_url,
+        language=child.language,
         created_at=child.created_at,
         letter_count=letter_count,
         wish_item_count=wish_item_count,
@@ -148,7 +149,7 @@ def get_child(
 def update_child(
     child_id: int,
     child_update: ChildUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_write_access),
     db: Session = Depends(get_db)
 ):
     """Update a child's details."""
@@ -176,7 +177,7 @@ def update_child(
 @router.delete("/{child_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_child(
     child_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_write_access),
     db: Session = Depends(get_db)
 ):
     """Remove a child and all their data."""

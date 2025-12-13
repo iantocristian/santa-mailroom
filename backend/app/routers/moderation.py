@@ -4,7 +4,7 @@ from typing import List, Optional
 from datetime import datetime
 
 from app.database import get_db
-from app.auth import get_current_user
+from app.auth import get_current_user, require_write_access
 from app.models import User, ModerationFlag, Letter, Child
 from app.schemas import ModerationFlagResponse, ModerationFlagUpdate, ModerationFlagWithContext
 
@@ -110,7 +110,7 @@ def get_moderation_flag(
 def resolve_moderation_flag(
     flag_id: int,
     flag_update: ModerationFlagUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_write_access),
     db: Session = Depends(get_db)
 ):
     """Resolve a moderation flag."""

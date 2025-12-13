@@ -4,7 +4,7 @@ from typing import List, Optional
 from datetime import datetime
 
 from app.database import get_db
-from app.auth import get_current_user
+from app.auth import get_current_user, require_write_access
 from app.models import User, GoodDeed, Child
 from app.schemas import GoodDeedCreate, GoodDeedUpdate, GoodDeedResponse, GoodDeedWithChild
 from app.job_queue import Job
@@ -65,7 +65,7 @@ def list_good_deeds(
 def create_good_deed(
     deed_data: GoodDeedCreate,
     send_email: bool = Query(True, description="Send notification email to child"),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_write_access),
     db: Session = Depends(get_db)
 ):
     """Suggest a new good deed for a child."""
@@ -134,7 +134,7 @@ def get_good_deed(
 def update_good_deed(
     deed_id: int,
     deed_update: GoodDeedUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_write_access),
     db: Session = Depends(get_db)
 ):
     """Update a good deed (mark as completed, add note)."""
@@ -170,7 +170,7 @@ def complete_good_deed(
     deed_id: int,
     body: Optional[dict] = None,
     send_email: bool = Query(True, description="Send congratulations email to child"),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_write_access),
     db: Session = Depends(get_db)
 ):
     """Mark a good deed as completed."""
@@ -211,7 +211,7 @@ def complete_good_deed(
 @router.delete("/{deed_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_good_deed(
     deed_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_write_access),
     db: Session = Depends(get_db)
 ):
     """Delete a good deed."""
