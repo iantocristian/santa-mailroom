@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from openai import OpenAI
 
 from app.config import get_settings
+from app.prompts import extraction, santa_email, deed_email, deed_congrats, safety
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -69,34 +70,8 @@ class GPTService:
         Returns:
             List of extracted wish items
         """
-        system_prompt = """You are an assistant that helps extract gift wishes from children's letters to Santa.
-
-Extract all gift requests, wishes, or items the child mentions wanting. For each item:
-1. Extract the exact text as mentioned
-2. Normalize it to a searchable product name
-3. Categorize it (toys, books, clothes, electronics, games, sports, crafts, pets, experiences, other)
-
-Be thorough - children often mention wishes casually or indirectly.
-
-Respond with JSON in this format:
-{
-  "items": [
-    {
-      "raw_text": "exact text from letter",
-      "normalized_name": "searchable product name",
-      "category": "category"
-    }
-  ]
-}
-
-If no wishes are found, return {"items": []}"""
-
-        user_prompt = f"""Child's name: {child_name}
-
-Letter:
-{letter_text}
-
-Extract all wish items from this letter."""
+        system_prompt = extraction.EXTRACT_WISHES_SYSTEM
+        user_prompt = extraction.get_extract_wishes_user(child_name, letter_text)
 
         try:
             response = self._chat(
@@ -134,54 +109,8 @@ Extract all wish items from this letter."""
         Returns:
             ModerationResult with any flags
         """
-        strictness_guide = {
-            "low": "Only flag very serious concerns like explicit mentions of harm, abuse, or crisis.",
-            "medium": "Flag concerning content including sadness, anxiety, bullying mentions, family problems, or hints at self-harm.",
-            "high": "Flag any content that might indicate the child is struggling emotionally, including mild sadness, loneliness, or stress."
-        }
-        
-        system_prompt = f"""You are a child safety specialist reviewing letters to Santa.
-        
-Your job is to identify any concerning content that parents should be aware of.
-Strictness level: {strictness}
-{strictness_guide.get(strictness, strictness_guide["medium"])}
-
-Categories to check:
-- self_harm: Any hints at self-harm or suicidal ideation
-- abuse: Signs of physical, emotional, or neglect
-- bullying: Being bullied or bullying others
-- sad: General sadness, depression, loneliness
-- anxious: Anxiety, worry, fear
-- family_issues: Divorce, fighting, loss, stress at home
-- violence: Concerning interest in violence
-
-For each concern found, provide:
-- type: category from above
-- severity: low, medium, or high
-- excerpt: the concerning text
-- confidence: 0.0-1.0 how confident you are
-- explanation: brief explanation of why this is concerning
-
-Respond with JSON:
-{{
-  "is_concerning": boolean,
-  "flags": [
-    {{
-      "type": "category",
-      "severity": "level",
-      "excerpt": "text",
-      "confidence": 0.0-1.0,
-      "explanation": "why this is concerning"
-    }}
-  ]
-}}"""
-
-        user_prompt = f"""Child's name: {child_name}
-
-Letter:
-{letter_text}
-
-Analyze this letter for any concerning content."""
+        system_prompt = extraction.get_moderation_system(strictness)
+        user_prompt = extraction.get_moderation_user(child_name, letter_text)
 
         try:
             response = self._chat(
@@ -347,132 +276,19 @@ Write a magical reply from Santa!"""
         """
         
         age_context = f"The child is approximately {child_age} years old." if child_age else "Age unknown."
+        items_context = santa_email.build_items_context(wish_items, denied_items)
+        deeds_context = santa_email.build_deeds_context(pending_deeds, completed_deeds)
+        concerning_addon = santa_email.get_concerning_addon(has_concerning_content)
         
-        # Build context about items
-        items_context = ""
-        if wish_items:
-            items_context += f"\n\nApproved/pending wishes: {', '.join(w.get('name', w.get('raw_text', '')) for w in wish_items)}"
-        if denied_items:
-            items_context += f"\n\nItems to redirect (don't mention directly, suggest alternatives): "
-            for item in denied_items:
-                items_context += f"\n- {item.get('name', '')}: {item.get('reason', 'not available')}"
-        
-        # Build deeds context
-        deeds_context = ""
-        if completed_deeds:
-            deeds_context += f"\n\nGood deeds completed recently (acknowledge these!): {', '.join(completed_deeds)}"
-        if pending_deeds:
-            deeds_context += f"\n\nPending good deeds (gently encourage): {', '.join(pending_deeds)}"
-        
-        concerning_addon = ""
-        if has_concerning_content:
-            concerning_addon = """
-
-IMPORTANT: The letter contained some concerning content. Include warm, supportive messaging.
-Encourage the child to talk to their parents or a trusted adult if they're feeling sad or worried.
-Keep it gentle and not alarming."""
-
-        language_instruction = ""
-        if language and language.lower() != "en":
-            language_instruction = f"""
-
-LANGUAGE REQUIREMENT: Write the ENTIRE email in {language.upper()}. 
-This includes ALL text: greeting, body, headings, good deed, closing, signature.
-Use culturally appropriate expressions and style for this language.
-Only the image CID references should remain in English (e.g., cid:santa_sleigh)."""
-
-        system_prompt = f"""You are Santa Claus creating a magical, personalized HTML email for a child.{language_instruction}
-
-You will generate a complete HTML email body with images selected from the available catalog.
-The email should feel unique and personal, not formulaic.
-
-Guidelines:
-- Be warm, jolly, and magical
-- Use the child's name naturally throughout
-- Reference specific things from their letter
-- Keep appropriate for the child's age
-- Include 3-5 images from the catalog to make the email visually delightful
-- Suggest ONE simple good deed for the week
-
-MANDATORY IMAGES (must include these):
-- Header: Use cid:santa_sleigh as a banner image at the top (404x178)
-- Footer: Use cid:elves_bell near the closing (258x193)
-- Select 2-4 additional images from the catalog for the body
-
-{age_context}
-{items_context}
-{deeds_context}
-{concerning_addon}
-
-{image_catalog}
-
-CRITICAL STYLING RULES (make it visually rich with LOTS OF EMOJIS!):
-
-1. GREETING (red, italic, with heart emoji):
-   <td style="padding: 20px 30px; font-size: 24px; font-style: italic; color: #c00000;">
-       Dear [Name], ❤️✨
-   </td>
-
-2. SECTION HEADINGS (use emojis liberally!):
-   - "🎄 Your Letter Arrived! 🎄" or "❄️ News from the Workshop! ❄️"
-   - "🦌 The Reindeer Are Ready! 🦌" or "⭐ You're On the Nice List! ⭐"
-   - Style: color: #c00000; font-size: 20-22px; font-weight: bold;
-
-3. GOOD DEED HEADING (red, italic, with star emojis):
-   <h2 style="margin: 0; color: #c00000; font-family: Georgia, serif; font-size: 28px; font-style: italic; text-align: center;">
-       ⭐ A Very Important Job For You! ⭐
-   </h2>
-
-4. CLOSING MESSAGE (red, bold, larger):
-   <p style="font-size: 22px; color: #c00000; font-weight: bold;">
-       Merry Christmas, little friend! ☃️❤️🎄
-   </p>
-
-5. SIGNATURE (brown, italic, elegant):
-   <p style="font-size: 24px; font-style: italic; color: #5a3a22; line-height: 1.4;">
-       Love from the North Pole,<br>
-       Santa & The Elves 🎅🧝‍♂️🧝‍♀️🦌❤️
-   </p>
-
-6. BODY TEXT with emojis: 
-   - Sprinkle emojis throughout paragraphs: ✨ ❄️ 🎁 ⭐ 🦌 🎄 ❤️ 🛷 ☃️ 🍪 🥛
-   - End sentences with relevant emojis
-   - font-size: 16-18px, line-height: 1.5-1.6, color: #5a3a22
-
-EMOJI USAGE GUIDE (use these generously!):
-🎅 Santa | 🎄 Christmas tree | ❄️ Snowflake | ⭐ Star | ✨ Sparkle
-🦌 Reindeer | 🛷 Sleigh | 🎁 Present | ❤️ Heart | 🧝‍♂️🧝‍♀️ Elves
-☃️ Snowman | 🍪 Cookie | 🥛 Milk | 🔔 Bell | 🌟 Glowing star
-
-HTML STRUCTURE RULES:
-1. Use table-based layout for email compatibility (no div, no CSS flexbox/grid)
-2. Images must use src="cid:NAME" format (e.g., src="cid:santa_sleigh")
-3. Use inline styles only (style="...")
-4. Keep width max 600px for main content, center align
-5. Wrap everything in a table with background-color: #FFF8DC and border: 1px solid #d4af37
-6. Place images next to text in table cells for visual interest
-
-PLAIN TEXT VERSION:
-- Use LOTS of emojis: 🎅 🎄 ❄️ 🎁 ⭐ 🦌 🛷 ❤️ ✨ ☃️ 🧝‍♂️🧝‍♀️
-- Start each paragraph or section with emojis
-- Make it warm, festive, and readable
-
-Respond with JSON in this exact format:
-{{
-    "html_body": "<table>...complete HTML with rich styling and LOTS of emojis...</table>",
-    "text_body": "🎅❄️ Ho ho ho! Festive text with many emojis... 🎄✨",
-    "suggested_deed": "One specific good deed suggestion",
-    "images_used": ["santa_sleigh", "elves_bell", "other_cid_1", "other_cid_2"]
-}}
-
-Make each email VISUALLY STUNNING with rich styling AND lots of festive emojis! 🎄✨"""
-
-        user_prompt = f"""Create a magical email for {child_name}!
-
-Their letter:
-{letter_text}
-
-Generate a beautiful, unique HTML email from Santa with appropriate images. Remember to include the mandatory header (santa_sleigh) and footer (elves_bell) images!"""
+        system_prompt = santa_email.get_santa_email_system(
+            age_context=age_context,
+            items_context=items_context,
+            deeds_context=deeds_context,
+            concerning_addon=concerning_addon,
+            image_catalog=image_catalog,
+            language=language
+        )
+        user_prompt = santa_email.get_santa_email_user(child_name, letter_text)
 
         try:
             response = self._chat(
@@ -604,62 +420,12 @@ With love from the North Pole,
         age_context = f"The child is approximately {child_age} years old." if child_age else "Age unknown."
         image_catalog = get_catalog_for_gpt()
         
-        language_instruction = ""
-        if language and language.lower() != "en":
-            language_instruction = f"""
-
-LANGUAGE REQUIREMENT: Write the ENTIRE email in {language.upper()}.
-This includes ALL text: greeting, body, headings, closing, signature.
-Use culturally appropriate expressions and style for this language.
-"""
-        
-        system_prompt = f"""You are Santa Claus, writing a magical HTML email to a child about a special good deed!{language_instruction}
-
-Guidelines:
-- Be warm, jolly, and magical with LOTS OF EMOJIS! 🎅❤️✨
-- Use the child's name naturally
-- Keep it SHORT - 2-3 paragraphs max
-- Make the child excited about doing the deed
-- Don't mention Christmas presents directly - focus on the joy of helping others
-
-{age_context}
-
-MANDATORY IMAGES:
-- Use cid:santa_sleigh (404x178) as header
-- Use cid:elf_announcing (139x215) or another appropriate elf image in the body
-- Use cid:elves_bell (258x193) near closing
-
-{image_catalog}
-
-STYLING (same as Santa replies):
-1. GREETING: style="font-size: 24px; font-style: italic; color: #c00000;"
-   "Dear [Name], ❤️✨"
-
-2. DEED HEADING: style="color: #c00000; font-size: 28px; font-style: italic;"
-   "⭐ Santa Has a Special Mission For You! ⭐"
-
-3. CLOSING: style="font-size: 22px; color: #c00000; font-weight: bold;"
-   "You can do it! I believe in you! 🌟❤️"
-
-4. SIGNATURE: style="font-size: 24px; font-style: italic; color: #5a3a22;"
-   "With love and jingle bells, Santa 🎅🔔✨"
-
-5. USE EMOJIS EVERYWHERE: ⭐ ❤️ ✨ 🎅 🎄 🦌 🧝‍♂️ 🎁 ☃️ 🌟
-
-HTML: Use table-based layout, max 600px width, background #FFF8DC, border: 1px solid #d4af37
-
-Respond with JSON:
-{{
-    "html_body": "<table>...rich HTML with images and emojis...</table>",
-    "text_body": "🎅✨ Emoji-rich plain text version... ❤️🎄",
-    "images_used": ["santa_sleigh", "elf_announcing", "elves_bell"]
-}}"""
-
-        user_prompt = f"""Child's name: {child_name}
-
-Good deed to suggest: {deed_description}
-
-Write a magical, visually rich email from Santa about this good deed! Include images and lots of emojis!"""
+        system_prompt = deed_email.get_deed_email_system(
+            age_context=age_context,
+            image_catalog=image_catalog,
+            language=language
+        )
+        user_prompt = deed_email.get_deed_email_user(child_name, deed_description)
 
         try:
             response = self._chat(
@@ -720,70 +486,12 @@ Write a magical, visually rich email from Santa about this good deed! Include im
         age_context = f"The child is approximately {child_age} years old." if child_age else "Age unknown."
         image_catalog = get_catalog_for_gpt()
         
-        note_context = ""
-        if parent_note:
-            note_context = f"\n\nNote from parent about how it went: {parent_note}"
-        
-        language_instruction = ""
-        if language and language.lower() != "en":
-            language_instruction = f"""
-
-LANGUAGE REQUIREMENT: Write the ENTIRE email in {language.upper()}.
-This includes ALL text: greeting, body, headings, celebration message, closing, signature.
-Use culturally appropriate expressions and style for this language.
-"""
-        
-        system_prompt = f"""You are Santa Claus, writing a CELEBRATORY HTML email to a child who completed a good deed!{language_instruction}
-
-Guidelines:
-- Be VERY excited and proud with LOTS OF EMOJIS! 🎉🎅❤️✨⭐
-- Use the child's name naturally
-- Keep it SHORT - 2-3 paragraphs max
-- Specifically mention what they did and celebrate it!
-- Make them feel special and proud
-- This is a CELEBRATION email - make it feel like a party!
-
-{age_context}
-
-MANDATORY IMAGES:
-- Use cid:santa_sleigh (404x178) as header
-- Use cid:elves_bell (258x193) - celebrating elves for congratulations!
-- Use cid:nice_list_green (138x140) or cid:nice_list_red (137x138) to show they're on the nice list!
-
-{image_catalog}
-
-STYLING (celebratory theme!):
-1. GREETING: style="font-size: 24px; font-style: italic; color: #c00000;"
-   "Dear [Name], 🌟❤️✨"
-
-2. CELEBRATION HEADING: style="color: #c00000; font-size: 28px; font-style: italic;"
-   "🎉⭐ YOU DID IT! AMAZING! ⭐🎉" or "🎉✨ WONDERFUL NEWS! ✨🎉"
-
-3. NICE LIST MESSAGE: style="font-size: 20px; color: #c00000; font-weight: bold;"
-   "⭐ You're definitely on the Nice List! ⭐" 
-
-4. CLOSING: style="font-size: 22px; color: #c00000; font-weight: bold;"
-   "Santa is SO PROUD of you! 🎅❤️🌟"
-
-5. SIGNATURE: style="font-size: 24px; font-style: italic; color: #5a3a22;"
-   "With proud jingle bells, Santa 🎅🔔✨❤️"
-
-6. USE CELEBRATION EMOJIS: 🎉 ⭐ ❤️ ✨ 🎅 🎄 🌟 🏆 👏 🥳 💫
-
-HTML: Use table-based layout, max 600px width, background #FFF8DC, border: 1px solid #d4af37
-
-Respond with JSON:
-{{
-    "html_body": "<table>...celebratory HTML with images and emojis...</table>",
-    "text_body": "🎉🎅 WONDERFUL NEWS! Celebratory text with emojis... ⭐❤️",
-    "images_used": ["santa_sleigh", "elves_bell", "nice_list_green"]
-}}"""
-
-        user_prompt = f"""Child's name: {child_name}
-
-Good deed they completed: {deed_description}{note_context}
-
-Write a CELEBRATORY email from Santa congratulating them with lots of excitement and emojis!"""
+        system_prompt = deed_congrats.get_deed_congrats_system(
+            age_context=age_context,
+            image_catalog=image_catalog,
+            language=language
+        )
+        user_prompt = deed_congrats.get_deed_congrats_user(child_name, deed_description, parent_note)
 
         try:
             response = self._chat(
@@ -837,47 +545,8 @@ Write a CELEBRATORY email from Santa congratulating them with lots of excitement
         Returns:
             Tuple of (is_safe: bool, reason_if_unsafe: Optional[str])
         """
-        email_type_descriptions = {
-            "letter_reply": "a reply from Santa to a child's letter",
-            "deed_email": "Santa encouraging a child to do a good deed",
-            "deed_congrats": "Santa congratulating a child for completing a good deed"
-        }
-        
-        type_desc = email_type_descriptions.get(email_type, "an email from Santa to a child")
-        
-        system_prompt = f"""You are a child safety content moderator. Your job is to verify that AI-generated emails are safe and appropriate for children.
-
-You are reviewing {type_desc}.
-
-Check for these safety issues:
-1. INAPPROPRIATE LANGUAGE: Profanity, slurs, adult language, crude humor
-2. ADULT THEMES: Violence, sexuality, drugs, alcohol, gambling, scary content
-3. HARMFUL CONTENT: Bullying, discrimination, self-harm references, dangerous activities
-4. MANIPULATION: Pressure tactics, guilt-tripping, inappropriate requests
-5. PRIVACY CONCERNS: Requests for personal information, addresses, phone numbers
-6. OFF-TOPIC: Content that doesn't match the expected email type (e.g., not about Christmas/Santa)
-7. TONE ISSUES: Scary, threatening, overly negative, or discouraging tone
-
-This email is for a child named {child_name}.
-
-Respond with JSON in this exact format:
-{{
-  "is_safe": true/false,
-  "issues_found": ["list of specific issues found, empty if safe"],
-  "severity": "none" | "low" | "medium" | "high",
-  "recommendation": "APPROVE" | "BLOCK",
-  "explanation": "Brief explanation of your decision"
-}}
-
-Be strict but reasonable. Santa emails should be warm, encouraging, magical, and age-appropriate."""
-
-        user_prompt = f"""Please review this email that will be sent to a child:
-
----
-{email_content}
----
-
-Is this email safe and appropriate for the child {child_name}?"""
+        system_prompt = safety.get_safety_check_system(email_type, child_name)
+        user_prompt = safety.get_safety_check_user(email_content, child_name)
 
         try:
             response = self._chat(
