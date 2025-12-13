@@ -39,6 +39,7 @@ MANDATORY IMAGES:
 
 Respond with JSON:
 {{
+    "subject": "A short, celebratory email subject with emojis (e.g., 🎉⭐ Santa is SO PROUD of You! ⭐🎉)",
     "html_body": "<table>...celebratory HTML with images and emojis...</table>",
     "text_body": "🎉🎅 WONDERFUL NEWS! Celebratory text with emojis... ⭐❤️",
     "images_used": ["santa_sleigh", "elves_bell", "nice_list_green"]

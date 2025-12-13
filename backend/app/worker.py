@@ -514,7 +514,7 @@ def handle_send_deed_email(db: Session, payload: dict):
             sent_email = SentEmail(
                 child_id=child.id,
                 email_type="deed_suggestion",
-                subject="⭐ A Special Mission from Santa! 🎅",
+                subject=rich_email["subject"],
                 body_text=rich_email["text_body"],
                 deed_id=deed.id,
                 delivery_status="blocked"
@@ -531,7 +531,7 @@ def handle_send_deed_email(db: Session, payload: dict):
         success = email_service.send_rich_email(
             to_email=last_letter.from_email,
             to_name=child.name,
-            subject="⭐ A Special Mission from Santa! 🎅",
+            subject=rich_email["subject"],
             body_text=rich_email["text_body"],
             body_html=rich_email["html_body"],
             images_used=rich_email["images_used"],
@@ -541,7 +541,7 @@ def handle_send_deed_email(db: Session, payload: dict):
         success = email_service.send_santa_reply(
             to_email=last_letter.from_email,
             to_name=child.name,
-            subject="⭐ A Special Mission from Santa! 🎅",
+            subject=rich_email["subject"],
             body_text=rich_email["text_body"],
             family_code=family_code
         )
@@ -553,7 +553,7 @@ def handle_send_deed_email(db: Session, payload: dict):
         sent_email = SentEmail(
             child_id=child.id,
             email_type="deed_suggestion",
-            subject="⭐ A Special Mission from Santa! 🎅",
+            subject=rich_email["subject"],
             body_text=rich_email["text_body"],
             deed_id=deed.id,
             delivery_status="sent"
@@ -621,7 +621,7 @@ def handle_send_deed_congrats(db: Session, payload: dict):
             sent_email = SentEmail(
                 child_id=child.id,
                 email_type="deed_congrats",
-                subject="🎉⭐ Santa is SO PROUD of You! ⭐🎉",
+                subject=rich_email["subject"],
                 body_text=rich_email["text_body"],
                 deed_id=deed.id,
                 delivery_status="blocked"
@@ -638,7 +638,7 @@ def handle_send_deed_congrats(db: Session, payload: dict):
         success = email_service.send_rich_email(
             to_email=last_letter.from_email,
             to_name=child.name,
-            subject="🎉⭐ Santa is SO PROUD of You! ⭐🎉",
+            subject=rich_email["subject"],
             body_text=rich_email["text_body"],
             body_html=rich_email["html_body"],
             images_used=rich_email["images_used"],
@@ -648,7 +648,7 @@ def handle_send_deed_congrats(db: Session, payload: dict):
         success = email_service.send_santa_reply(
             to_email=last_letter.from_email,
             to_name=child.name,
-            subject="🎉⭐ Santa is SO PROUD of You! ⭐🎉",
+            subject=rich_email["subject"],
             body_text=rich_email["text_body"],
             family_code=family_code
         )
@@ -660,7 +660,7 @@ def handle_send_deed_congrats(db: Session, payload: dict):
         sent_email = SentEmail(
             child_id=child.id,
             email_type="deed_congrats",
-            subject="🎉⭐ Santa is SO PROUD of You! ⭐🎉",
+            subject=rich_email["subject"],
             body_text=rich_email["text_body"],
             deed_id=deed.id,
             delivery_status="sent"

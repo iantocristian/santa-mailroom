@@ -38,6 +38,7 @@ MANDATORY IMAGES:
 
 Respond with JSON:
 {{
+    "subject": "A short, festive email subject with emojis (e.g., ⭐ A Special Mission from Santa! 🎅)",
     "html_body": "<table>...rich HTML with images and emojis...</table>",
     "text_body": "🎅✨ Emoji-rich plain text version... ❤️🎄",
     "images_used": ["santa_sleigh", "elf_announcing", "elves_bell"]

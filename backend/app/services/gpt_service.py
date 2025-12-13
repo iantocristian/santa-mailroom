@@ -448,6 +448,7 @@ With love from the North Pole,
                 images.append("elves_bell")
             
             return {
+                "subject": data.get("subject", "⭐ A Special Mission from Santa! 🎅"),
                 "html_body": data.get("html_body", ""),
                 "text_body": data.get("text_body", f"🎅 Ho ho ho, {child_name}! Santa has a special mission for you! ✨"),
                 "images_used": images
@@ -456,6 +457,7 @@ With love from the North Pole,
         except Exception as e:
             logger.error(f"Error generating deed email: {e}")
             return {
+                "subject": "⭐ A Special Mission from Santa! 🎅",
                 "html_body": "",
                 "text_body": f"🎅❤️ Ho ho ho, {child_name}! ❤️🎅\n\n⭐ Santa has a very special mission for you! ⭐\n\n{deed_description}\n\n✨ This would make Santa so proud! Remember, every act of kindness makes the world a little brighter and spreads Christmas magic! 🎄❤️\n\n🌟 You can do it! I believe in you! 🌟\n\nWith love and jingle bells,\n🎅 Santa Claus 🔔✨",
                 "images_used": ["santa_sleigh", "elves_bell"]
@@ -514,6 +516,7 @@ With love from the North Pole,
                 images.append("elves_bell")
             
             return {
+                "subject": data.get("subject", "🎉⭐ Santa is SO PROUD of You! ⭐🎉"),
                 "html_body": data.get("html_body", ""),
                 "text_body": data.get("text_body", f"🎉 Ho ho ho, {child_name}! You did it! 🌟"),
                 "images_used": images
@@ -522,6 +525,7 @@ With love from the North Pole,
         except Exception as e:
             logger.error(f"Error generating congrats email: {e}")
             return {
+                "subject": "🎉⭐ Santa is SO PROUD of You! ⭐🎉",
                 "html_body": "",
                 "text_body": f"🎅🎉 Ho ho ho, {child_name}! 🎉🎅\n\n⭐✨ WONDERFUL NEWS! ✨⭐\n\nSanta just heard that you completed your good deed: {deed_description}\n\n🌟 I am SO PROUD of you! 🌟\n\nThis is exactly the kind of kindness that makes Christmas magic real! You've made Santa's heart very happy today! ❤️🎄\n\n⭐ You're definitely on the Nice List! ⭐\n\nKeep being the amazing person you are! 🎁✨\n\nWith proud jingle bells,\n🎅 Santa Claus 🔔❤️✨",
                 "images_used": ["santa_sleigh", "elves_bell"]
