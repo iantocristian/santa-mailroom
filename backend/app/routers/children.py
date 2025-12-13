@@ -28,7 +28,10 @@ def list_children(
     if not current_user.family:
         return []  # No family yet, return empty list
     
-    children = current_user.family.children
+    # Order by name for consistent display
+    children = db.query(Child).filter(
+        Child.family_id == current_user.family.id
+    ).order_by(Child.name).all()
     result = []
     
     for child in children:
@@ -50,6 +53,7 @@ def list_children(
             birth_year=child.birth_year,
             avatar_url=child.avatar_url,
             language=child.language,
+            description=child.description,
             created_at=child.created_at,
             letter_count=letter_count,
             wish_item_count=wish_item_count,
@@ -94,7 +98,8 @@ def create_child(
         country=child_data.country,
         birth_year=child_data.birth_year,
         avatar_url=child_data.avatar_url,
-        language=child_data.language
+        language=child_data.language,
+        description=child_data.description
     )
     
     db.add(child)
@@ -140,6 +145,7 @@ def get_child(
         birth_year=child.birth_year,
         avatar_url=child.avatar_url,
         language=child.language,
+        description=child.description,
         created_at=child.created_at,
         letter_count=letter_count,
         wish_item_count=wish_item_count,

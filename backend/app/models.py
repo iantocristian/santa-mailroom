@@ -113,6 +113,7 @@ class Child(Base):
     birth_year = Column(Integer, nullable=True)  # For age-appropriate filtering
     avatar_url = Column(String(500), nullable=True)
     language = Column(String(10), nullable=True)  # Language for Santa's emails, e.g., "en", "es"
+    description = Column(Text, nullable=True)  # Extra details for Santa (interests, personality, etc.)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

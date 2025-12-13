@@ -84,11 +84,13 @@
         "addFirstChildDesc": "Ajoutez votre premier enfant pour commencer à recevoir des lettres du courrier du Père Noël !",
         "addFirstChild": "Ajouter le premier enfant",
         "removeChild": "Supprimer l'enfant",
+        "editChild": "Modifier l'enfant",
         "confirmDelete": "Êtes-vous sûr de vouloir supprimer {{name}} ? Toutes leurs lettres et souhaits seront supprimés.",
         "letters": "Lettres",
         "wishes": "Souhaits",
         "deeds": "Actions",
         "addChildTitle": "Ajouter un enfant",
+        "editChildTitle": "Modifier l'enfant",
         "childName": "Nom de l'enfant",
         "childEmail": "Email de l'enfant",
         "childEmailPlaceholder": "L'email qu'il utilisera pour écrire au Père Noël",
@@ -99,7 +101,12 @@
         "emailLanguage": "Langue des emails",
         "englishDefault": "Anglais (par défaut)",
         "santaLanguageNote": "Le Père Noël écrira des emails dans cette langue",
-        "failedToAdd": "Impossible d'ajouter l'enfant"
+        "description": "Détails supplémentaires pour le Père Noël",
+        "descriptionPlaceholder": "Parlez au Père Noël des intérêts, de la personnalité, des choses préférées...",
+        "descriptionNote": "Cela aide le Père Noël à écrire des emails plus personnalisés",
+        "failedToAdd": "Impossible d'ajouter l'enfant",
+        "failedToUpdate": "Impossible de mettre à jour l'enfant",
+        "saveChanges": "Enregistrer les modifications"
     },
     "wishlist": {
         "title": "Liste de souhaits",

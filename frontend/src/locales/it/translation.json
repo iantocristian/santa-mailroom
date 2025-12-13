@@ -84,11 +84,13 @@
         "addFirstChildDesc": "Aggiungi il tuo primo bambino per iniziare a ricevere lettere dalla posta di Babbo Natale!",
         "addFirstChild": "Aggiungi il primo bambino",
         "removeChild": "Rimuovi bambino",
+        "editChild": "Modifica bambino",
         "confirmDelete": "Sei sicuro di voler rimuovere {{name}}? Verranno eliminate tutte le loro lettere e desideri.",
         "letters": "Lettere",
         "wishes": "Desideri",
         "deeds": "Azioni",
         "addChildTitle": "Aggiungi un bambino",
+        "editChildTitle": "Modifica bambino",
         "childName": "Nome del bambino",
         "childEmail": "Email del bambino",
         "childEmailPlaceholder": "L'email che userà per scrivere a Babbo Natale",
@@ -99,7 +101,12 @@
         "emailLanguage": "Lingua email",
         "englishDefault": "Inglese (predefinito)",
         "santaLanguageNote": "Babbo Natale scriverà email in questa lingua",
-        "failedToAdd": "Impossibile aggiungere il bambino"
+        "description": "Dettagli aggiuntivi per Babbo Natale",
+        "descriptionPlaceholder": "Racconta a Babbo Natale di interessi, personalità, cose preferite...",
+        "descriptionNote": "Questo aiuta Babbo Natale a scrivere email più personalizzate",
+        "failedToAdd": "Impossibile aggiungere il bambino",
+        "failedToUpdate": "Impossibile aggiornare il bambino",
+        "saveChanges": "Salva modifiche"
     },
     "wishlist": {
         "title": "Lista dei desideri",

@@ -84,11 +84,13 @@
         "addFirstChildDesc": "Dodaj swoje pierwsze dziecko, aby otrzymywać listy z poczty Świętego Mikołaja!",
         "addFirstChild": "Dodaj pierwsze dziecko",
         "removeChild": "Usuń dziecko",
+        "editChild": "Edytuj dziecko",
         "confirmDelete": "Czy na pewno chcesz usunąć {{name}}? Wszystkie listy i życzenia zostaną usunięte.",
         "letters": "Listy",
         "wishes": "Życzenia",
         "deeds": "Uczynki",
         "addChildTitle": "Dodaj dziecko",
+        "editChildTitle": "Edytuj dziecko",
         "childName": "Imię dziecka",
         "childEmail": "Email dziecka",
         "childEmailPlaceholder": "Email, którego użyje do pisania do Świętego Mikołaja",
@@ -99,7 +101,12 @@
         "emailLanguage": "Język emaili",
         "englishDefault": "Angielski (domyślny)",
         "santaLanguageNote": "Święty Mikołaj będzie pisał emaile w tym języku",
-        "failedToAdd": "Nie udało się dodać dziecka"
+        "description": "Dodatkowe informacje dla Świętego Mikołaja",
+        "descriptionPlaceholder": "Opowiedz Świętemu Mikołajowi o zainteresowaniach, osobowości, ulubionych rzeczach...",
+        "descriptionNote": "To pomoże Świętemu Mikołajowi pisać bardziej spersonalizowane emaile",
+        "failedToAdd": "Nie udało się dodać dziecka",
+        "failedToUpdate": "Nie udało się zaktualizować dziecka",
+        "saveChanges": "Zapisz zmiany"
     },
     "wishlist": {
         "title": "Lista życzeń",

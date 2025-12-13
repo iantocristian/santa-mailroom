@@ -84,11 +84,13 @@
         "addFirstChildDesc": "Adaugă primul tău copil pentru a primi scrisori de la poșta lui Moș Crăciun!",
         "addFirstChild": "Adaugă primul copil",
         "removeChild": "Șterge copil",
+        "editChild": "Editează copil",
         "confirmDelete": "Ești sigur că vrei să ștergi pe {{name}}? Se vor șterge toate scrisorile și dorințele.",
         "letters": "Scrisori",
         "wishes": "Dorințe",
         "deeds": "Fapte",
         "addChildTitle": "Adaugă un copil",
+        "editChildTitle": "Editează copil",
         "childName": "Numele copilului",
         "childEmail": "Emailul copilului",
         "childEmailPlaceholder": "Emailul pe care îl va folosi pentru a scrie lui Moș Crăciun",
@@ -99,7 +101,12 @@
         "emailLanguage": "Limba emailurilor",
         "englishDefault": "Engleză (implicit)",
         "santaLanguageNote": "Moș Crăciun va scrie emailuri în această limbă",
-        "failedToAdd": "Nu s-a putut adăuga copilul"
+        "description": "Detalii suplimentare pentru Moș Crăciun",
+        "descriptionPlaceholder": "Spune-i lui Moș Crăciun despre interese, personalitate, lucruri preferate...",
+        "descriptionNote": "Acest lucru ajută Moș Crăciun să scrie emailuri mai personalizate",
+        "failedToAdd": "Nu s-a putut adăuga copilul",
+        "failedToUpdate": "Nu s-a putut actualiza copilul",
+        "saveChanges": "Salvează modificările"
     },
     "wishlist": {
         "title": "Lista de dorințe",

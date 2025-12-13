@@ -84,11 +84,13 @@
         "addFirstChildDesc": "Add your first child to start receiving letters from Santa's mailroom!",
         "addFirstChild": "Add Your First Child",
         "removeChild": "Remove child",
+        "editChild": "Edit child",
         "confirmDelete": "Are you sure you want to remove {{name}}? This will delete all their letters and wishes.",
         "letters": "Letters",
         "wishes": "Wishes",
         "deeds": "Deeds",
         "addChildTitle": "Add a Child",
+        "editChildTitle": "Edit Child",
         "childName": "Child's Name",
         "childEmail": "Child's Email",
         "childEmailPlaceholder": "The email they'll use to write Santa",
@@ -99,7 +101,12 @@
         "emailLanguage": "Email Language",
         "englishDefault": "English (default)",
         "santaLanguageNote": "Santa will write emails in this language",
-        "failedToAdd": "Failed to add child"
+        "description": "Extra Details for Santa",
+        "descriptionPlaceholder": "Tell Santa about interests, personality, favorite things...",
+        "descriptionNote": "This helps Santa write more personalized emails",
+        "failedToAdd": "Failed to add child",
+        "failedToUpdate": "Failed to update child",
+        "saveChanges": "Save Changes"
     },
     "wishlist": {
         "title": "Wishlist",

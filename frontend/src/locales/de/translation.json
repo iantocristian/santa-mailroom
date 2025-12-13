@@ -84,11 +84,13 @@
         "addFirstChildDesc": "Füge dein erstes Kind hinzu, um Briefe von der Weihnachtsmannpost zu erhalten!",
         "addFirstChild": "Erstes Kind hinzufügen",
         "removeChild": "Kind entfernen",
+        "editChild": "Kind bearbeiten",
         "confirmDelete": "Bist du sicher, dass du {{name}} entfernen möchtest? Alle ihre Briefe und Wünsche werden gelöscht.",
         "letters": "Briefe",
         "wishes": "Wünsche",
         "deeds": "Taten",
         "addChildTitle": "Ein Kind hinzufügen",
+        "editChildTitle": "Kind bearbeiten",
         "childName": "Name des Kindes",
         "childEmail": "E-Mail des Kindes",
         "childEmailPlaceholder": "Die E-Mail-Adresse, die sie zum Schreiben an den Weihnachtsmann verwenden",
@@ -99,7 +101,12 @@
         "emailLanguage": "E-Mail-Sprache",
         "englishDefault": "Englisch (Standard)",
         "santaLanguageNote": "Der Weihnachtsmann wird E-Mails in dieser Sprache schreiben",
-        "failedToAdd": "Kind konnte nicht hinzugefügt werden"
+        "description": "Zusätzliche Details für den Weihnachtsmann",
+        "descriptionPlaceholder": "Erzähle dem Weihnachtsmann von Interessen, Persönlichkeit, Lieblingsaktivitäten...",
+        "descriptionNote": "Das hilft dem Weihnachtsmann, persönlichere E-Mails zu schreiben",
+        "failedToAdd": "Kind konnte nicht hinzugefügt werden",
+        "failedToUpdate": "Kind konnte nicht aktualisiert werden",
+        "saveChanges": "Änderungen speichern"
     },
     "wishlist": {
         "title": "Wunschliste",

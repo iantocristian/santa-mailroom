@@ -86,6 +86,7 @@ class ChildCreate(BaseModel):
     birth_year: Optional[int] = Field(None, ge=1900, le=2100)
     avatar_url: Optional[str] = None
     language: Optional[str] = Field(None, max_length=10)  # e.g., "en", "es", "fr"
+    description: Optional[str] = Field(None, max_length=1000)  # Extra details for Santa
 
 
 class ChildUpdate(BaseModel):
@@ -94,6 +95,7 @@ class ChildUpdate(BaseModel):
     birth_year: Optional[int] = Field(None, ge=1900, le=2100)
     avatar_url: Optional[str] = None
     language: Optional[str] = Field(None, max_length=10)
+    description: Optional[str] = Field(None, max_length=1000)
 
 
 class ChildResponse(BaseModel):
@@ -103,6 +105,7 @@ class ChildResponse(BaseModel):
     birth_year: Optional[int]
     avatar_url: Optional[str]
     language: Optional[str]
+    description: Optional[str] = None
     created_at: datetime
     letter_count: Optional[int] = None  # Computed field
 

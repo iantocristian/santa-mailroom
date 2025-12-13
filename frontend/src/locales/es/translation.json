@@ -84,11 +84,13 @@
         "addFirstChildDesc": "¡Añade tu primer hijo para empezar a recibir cartas del correo de Papá Noel!",
         "addFirstChild": "Añadir primer hijo",
         "removeChild": "Eliminar niño",
+        "editChild": "Editar niño",
         "confirmDelete": "¿Estás seguro de que quieres eliminar a {{name}}? Se borrarán todas sus cartas y deseos.",
         "letters": "Cartas",
         "wishes": "Deseos",
         "deeds": "Acciones",
         "addChildTitle": "Añadir un niño",
+        "editChildTitle": "Editar niño",
         "childName": "Nombre del niño",
         "childEmail": "Correo del niño",
         "childEmailPlaceholder": "El correo que usará para escribir a Papá Noel",
@@ -99,7 +101,12 @@
         "emailLanguage": "Idioma del correo",
         "englishDefault": "Inglés (predeterminado)",
         "santaLanguageNote": "Papá Noel escribirá correos en este idioma",
-        "failedToAdd": "No se pudo añadir el niño"
+        "description": "Detalles adicionales para Papá Noel",
+        "descriptionPlaceholder": "Cuéntale a Papá Noel sobre intereses, personalidad, cosas favoritas...",
+        "descriptionNote": "Esto ayuda a Papá Noel a escribir correos más personalizados",
+        "failedToAdd": "No se pudo añadir el niño",
+        "failedToUpdate": "No se pudo actualizar el niño",
+        "saveChanges": "Guardar cambios"
     },
     "wishlist": {
         "title": "Lista de deseos",

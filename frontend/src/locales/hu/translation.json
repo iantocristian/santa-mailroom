@@ -84,11 +84,13 @@
         "addFirstChildDesc": "Add hozzá az első gyerekedet, hogy leveleket kapj a Mikulás postájából!",
         "addFirstChild": "Első gyerek hozzáadása",
         "removeChild": "Gyerek eltávolítása",
+        "editChild": "Gyerek szerkesztése",
         "confirmDelete": "Biztosan el akarod távolítani {{name}}-t? Minden levele és kívánsága törlődik.",
         "letters": "Levelek",
         "wishes": "Kívánságok",
         "deeds": "Cselekedetek",
         "addChildTitle": "Gyerek hozzáadása",
+        "editChildTitle": "Gyerek szerkesztése",
         "childName": "Gyerek neve",
         "childEmail": "Gyerek emailje",
         "childEmailPlaceholder": "Az email, amit a Mikulásnak íráshoz fog használni",
@@ -99,7 +101,12 @@
         "emailLanguage": "Email nyelve",
         "englishDefault": "Angol (alapértelmezett)",
         "santaLanguageNote": "A Mikulás ezen a nyelven fog emaileket írni",
-        "failedToAdd": "Nem sikerült hozzáadni a gyereket"
+        "description": "További részletek a Mikulásnak",
+        "descriptionPlaceholder": "Mesélj a Mikulásnak az érdeklődési körökről, személyiségről, kedvenc dolgokról...",
+        "descriptionNote": "Ez segít a Mikulásnak személyesebb emaileket írni",
+        "failedToAdd": "Nem sikerült hozzáadni a gyereket",
+        "failedToUpdate": "Nem sikerült frissíteni a gyereket",
+        "saveChanges": "Változtatások mentése"
     },
     "wishlist": {
         "title": "Kívánságlista",
