@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from typing import List
 import hashlib
@@ -7,6 +7,7 @@ from app.database import get_db
 from app.auth import get_current_user, require_write_access
 from app.models import User, Child, Letter, WishItem, GoodDeed
 from app.schemas import ChildCreate, ChildUpdate, ChildResponse, ChildWithStats
+from app.rate_limit import limiter, RATE_LIMITS
 
 router = APIRouter(prefix="/api/children", tags=["children"])
 
@@ -17,7 +18,9 @@ def hash_email(email: str) -> str:
 
 
 @router.get("", response_model=List[ChildWithStats])
+@limiter.limit(RATE_LIMITS["default"])
 def list_children(
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -7,6 +7,7 @@ from app.auth import get_current_user, require_write_access
 from app.models import User, Family
 from app.schemas import FamilyResponse, FamilyUpdate, FamilyStats, FamilyCreate
 from app.config import get_settings
+from app.rate_limit import limiter, RATE_LIMITS
 
 router = APIRouter(prefix="/api/family", tags=["family"])
 settings = get_settings()
@@ -20,7 +21,9 @@ def build_santa_email(santa_code: str) -> str:
 
 
 @router.get("", response_model=FamilyResponse)
+@limiter.limit(RATE_LIMITS["default"])
 def get_family(
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -85,7 +88,9 @@ def update_family(
 
 
 @router.get("/stats", response_model=FamilyStats)
+@limiter.limit(RATE_LIMITS["default"])
 def get_family_stats(
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):

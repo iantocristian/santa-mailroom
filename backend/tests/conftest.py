@@ -2,6 +2,10 @@
 Test fixtures and configuration for Santa Wishlist API tests.
 Uses SQLite in-memory database for fast, isolated testing.
 """
+import os
+# Disable rate limiting during tests
+os.environ["RATE_LIMIT_ENABLED"] = "false"
+
 import pytest
 from datetime import datetime, timedelta
 from typing import Generator, Tuple

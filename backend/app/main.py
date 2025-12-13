@@ -1,10 +1,14 @@
 import logging
 import sys
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from app.database import engine, Base, get_db
+from app.rate_limit import limiter
 
 # Import all models to ensure they're registered with Base
 from app import models  # noqa: F401
@@ -34,6 +38,10 @@ app = FastAPI(
     description="Christmas wish list application where children email Santa",
     version="1.0.0"
 )
+
+# Add rate limiter to app state
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS middleware
 app.add_middleware(

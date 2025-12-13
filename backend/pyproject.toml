@@ -46,6 +46,9 @@ dependencies = [
     
     # Utilities
     "python-dateutil>=2.8.2",
+    
+    # Rate limiting
+    "slowapi>=0.1.9",
 ]
 
 [project.optional-dependencies]
