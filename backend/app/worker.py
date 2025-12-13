@@ -265,10 +265,20 @@ def handle_process_letter(db: Session, payload: dict):
     product_search = get_product_search_service()
     wish_items = db.query(WishItem).filter(WishItem.letter_id == letter.id).all()
     
+    # Calculate child age for product search
+    child_age = None
+    if child.birth_year:
+        child_age = datetime.utcnow().year - child.birth_year
+    
     for wish_item in wish_items:
         if wish_item.normalized_name:
             country = child.country or "US"
-            product = product_search.search(wish_item.normalized_name, country)
+            product = product_search.search(
+                wish_item.normalized_name, 
+                country,
+                child_name=child.name,
+                child_age=child_age
+            )
             
             if product:
                 wish_item.estimated_price = product.estimated_price

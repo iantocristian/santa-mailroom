@@ -36,13 +36,21 @@ class ProductSearchService:
     def __init__(self):
         self.client = OpenAI(api_key=settings.openai_api_key) if settings.openai_api_key else None
     
-    def search(self, item_name: str, country: str = "US") -> Optional[ProductSearchResult]:
+    def search(
+        self, 
+        item_name: str, 
+        country: str = "US",
+        child_name: Optional[str] = None,
+        child_age: Optional[int] = None
+    ) -> Optional[ProductSearchResult]:
         """
         Search for a product using web search.
         
         Args:
             item_name: The product to search for
             country: Country code for regional results
+            child_name: Child's name (to infer gender)
+            child_age: Child's age (for age-appropriate products)
             
         Returns:
             ProductSearchResult or None if not found
@@ -51,10 +59,20 @@ class ProductSearchService:
             logger.warning("OpenAI API key not configured")
             return None
         
+        # Build child context for better product selection
+        child_context = ""
+        if child_name or child_age:
+            child_context = "\n\nChild context:"
+            if child_name:
+                child_context += f"\n- Name: {child_name} (infer likely gender from the name and {country} cultural context)"
+            if child_age:
+                child_context += f"\n- Age: {child_age} years old"
+            child_context += "\n\nIMPORTANT: Select a product variant appropriate for this child (e.g., boys/girls version, age-appropriate features, correct size range)."
+        
         prompt = f"""Search for this gift item for a child and provide purchase information:
         
 Product: {item_name}
-Country: {country}
+Country: {country}{child_context}
 
 Find:
 1. The exact product name as sold by a major retailer
