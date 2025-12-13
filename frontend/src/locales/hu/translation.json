@@ -207,5 +207,24 @@
         "failed": "Sikertelen",
         "relatedToLetter": "Kapcsolódik a #{{id}} levélhez",
         "relatedToDeed": "Kapcsolódik a #{{id}} cselekedethez"
+    },
+    "notification": {
+        "newLetter": {
+            "title": "Új levél {{name}}-tól!",
+            "message": "{{name}} új levelet küldött a Mikulásnak. Nézd meg az irányítópulton!"
+        },
+        "budgetAlert": {
+            "title": "Költségvetési figyelmeztetés",
+            "titleWithChild": "Költségvetési figyelmeztetés {{name}} számára",
+            "message": "A kívánságlista becsült költsége ({{totalCost}}) meghaladja a riasztási küszöböt ({{threshold}})."
+        },
+        "moderationFlag": {
+            "title": "{{emoji}} Megjelölt tartalom {{name}} levelében",
+            "message": "{{name}} levele felülvizsgálatra lett jelölve ({{flagType}}). Ellenőrizd a moderálási panelt."
+        },
+        "deedCompleted": {
+            "title": "{{name}} jó cselekedetet hajtott végre! ⭐",
+            "message": "{{name}} elvégezte: {{deed}}"
+        }
     }
 }

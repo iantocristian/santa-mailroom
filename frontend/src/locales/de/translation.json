@@ -207,5 +207,24 @@
         "failed": "Fehlgeschlagen",
         "relatedToLetter": "Bezogen auf Brief #{{id}}",
         "relatedToDeed": "Bezogen auf Tat #{{id}}"
+    },
+    "notification": {
+        "newLetter": {
+            "title": "Neuer Brief von {{name}}!",
+            "message": "{{name}} hat einen neuen Brief an den Weihnachtsmann geschickt. Schau ihn dir im Dashboard an!"
+        },
+        "budgetAlert": {
+            "title": "Budget-Warnung",
+            "titleWithChild": "Budget-Warnung für {{name}}",
+            "message": "Die geschätzten Kosten der Wunschliste ({{totalCost}}) überschreiten deine Budget-Schwelle ({{threshold}})."
+        },
+        "moderationFlag": {
+            "title": "{{emoji}} Inhalt in {{name}}s Brief markiert",
+            "message": "Ein Brief von {{name}} wurde zur Überprüfung markiert ({{flagType}}). Bitte überprüfe das Moderations-Dashboard."
+        },
+        "deedCompleted": {
+            "title": "Gute Tat von {{name}} abgeschlossen! ⭐",
+            "message": "{{name}} hat abgeschlossen: {{deed}}"
+        }
     }
 }

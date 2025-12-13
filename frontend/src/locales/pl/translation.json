@@ -207,5 +207,24 @@
         "failed": "Błąd",
         "relatedToLetter": "Powiązane z listem #{{id}}",
         "relatedToDeed": "Powiązane z uczynkiem #{{id}}"
+    },
+    "notification": {
+        "newLetter": {
+            "title": "Nowy list od {{name}}!",
+            "message": "{{name}} wysłał nowy list do Świętego Mikołaja. Sprawdź go w panelu!"
+        },
+        "budgetAlert": {
+            "title": "Alert budżetowy",
+            "titleWithChild": "Alert budżetowy dla {{name}}",
+            "message": "Szacunkowy koszt listy życzeń ({{totalCost}}) przekracza próg alertu ({{threshold}})."
+        },
+        "moderationFlag": {
+            "title": "{{emoji}} Treść oznaczona w liście {{name}}",
+            "message": "List od {{name}} został oznaczony do przeglądu ({{flagType}}). Sprawdź panel moderacji."
+        },
+        "deedCompleted": {
+            "title": "Dobry uczynek wykonany przez {{name}}! ⭐",
+            "message": "{{name}} wykonał: {{deed}}"
+        }
     }
 }

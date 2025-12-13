@@ -270,8 +270,14 @@ class ModerationFlagWithContext(ModerationFlagResponse):
 class NotificationResponse(BaseModel):
     id: int
     type: str
-    title: str
-    message: Optional[str]
+    # Legacy fields (for backward compatibility)
+    title: Optional[str] = None
+    message: Optional[str] = None
+    # i18n fields for translation
+    title_key: Optional[str] = None
+    title_params: Optional[str] = None  # JSON string
+    message_key: Optional[str] = None
+    message_params: Optional[str] = None  # JSON string
     read: bool
     related_letter_id: Optional[int]
     related_child_id: Optional[int]

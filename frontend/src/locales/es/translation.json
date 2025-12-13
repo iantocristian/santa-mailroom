@@ -207,5 +207,24 @@
         "failed": "Fallido",
         "relatedToLetter": "Relacionado con carta #{{id}}",
         "relatedToDeed": "Relacionado con acción #{{id}}"
+    },
+    "notification": {
+        "newLetter": {
+            "title": "¡Nueva carta de {{name}}!",
+            "message": "{{name}} envió una nueva carta a Papá Noel. ¡Mírala en el panel!"
+        },
+        "budgetAlert": {
+            "title": "Alerta de presupuesto",
+            "titleWithChild": "Alerta de presupuesto para {{name}}",
+            "message": "El costo estimado de la lista de deseos ({{totalCost}}) supera tu umbral de alerta ({{threshold}})."
+        },
+        "moderationFlag": {
+            "title": "{{emoji}} Contenido marcado en la carta de {{name}}",
+            "message": "Una carta de {{name}} ha sido marcada para revisión ({{flagType}}). Por favor revisa el panel de moderación."
+        },
+        "deedCompleted": {
+            "title": "¡Buena acción completada por {{name}}! ⭐",
+            "message": "{{name}} completó: {{deed}}"
+        }
     }
 }

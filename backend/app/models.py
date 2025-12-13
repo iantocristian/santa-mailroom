@@ -267,8 +267,17 @@ class Notification(Base):
     family_id = Column(Integer, ForeignKey("families.id"), nullable=False)
     
     type = Column(String(50), nullable=False)  # new_letter, budget_alert, moderation_flag, deed_completed
-    title = Column(String(200), nullable=False)
+    
+    # Legacy fields (kept for backward compatibility, will be empty for new notifications)
+    title = Column(String(200), nullable=True)
     message = Column(Text, nullable=True)
+    
+    # i18n fields - frontend translates using these keys
+    title_key = Column(String(100), nullable=True)  # e.g., "notification.newLetter.title"
+    title_params = Column(Text, nullable=True)  # JSON: {"name": "Emma"}
+    message_key = Column(String(100), nullable=True)  # e.g., "notification.newLetter.message"
+    message_params = Column(Text, nullable=True)  # JSON: {"name": "Emma"}
+    
     read = Column(Boolean, default=False)
     
     # Links to related entities

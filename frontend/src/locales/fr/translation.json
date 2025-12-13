@@ -207,5 +207,24 @@
         "failed": "Échec",
         "relatedToLetter": "Lié à la lettre #{{id}}",
         "relatedToDeed": "Lié à l'action #{{id}}"
+    },
+    "notification": {
+        "newLetter": {
+            "title": "Nouvelle lettre de {{name}} !",
+            "message": "{{name}} a envoyé une nouvelle lettre au Père Noël. Regarde-la dans le tableau de bord !"
+        },
+        "budgetAlert": {
+            "title": "Alerte budget",
+            "titleWithChild": "Alerte budget pour {{name}}",
+            "message": "Le coût estimé de la liste de souhaits ({{totalCost}}) dépasse ton seuil d'alerte ({{threshold}})."
+        },
+        "moderationFlag": {
+            "title": "{{emoji}} Contenu signalé dans la lettre de {{name}}",
+            "message": "Une lettre de {{name}} a été signalée pour révision ({{flagType}}). Vérifie le panneau de modération."
+        },
+        "deedCompleted": {
+            "title": "Bonne action accomplie par {{name}} ! ⭐",
+            "message": "{{name}} a accompli : {{deed}}"
+        }
     }
 }

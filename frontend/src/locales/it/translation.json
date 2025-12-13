@@ -207,5 +207,24 @@
         "failed": "Fallito",
         "relatedToLetter": "Correlato alla lettera #{{id}}",
         "relatedToDeed": "Correlato all'azione #{{id}}"
+    },
+    "notification": {
+        "newLetter": {
+            "title": "Nuova lettera da {{name}}!",
+            "message": "{{name}} ha inviato una nuova lettera a Babbo Natale. Guardala nella dashboard!"
+        },
+        "budgetAlert": {
+            "title": "Avviso budget",
+            "titleWithChild": "Avviso budget per {{name}}",
+            "message": "Il costo stimato della lista dei desideri ({{totalCost}}) supera la soglia di avviso ({{threshold}})."
+        },
+        "moderationFlag": {
+            "title": "{{emoji}} Contenuto segnalato nella lettera di {{name}}",
+            "message": "Una lettera da {{name}} è stata segnalata per revisione ({{flagType}}). Controlla il pannello di moderazione."
+        },
+        "deedCompleted": {
+            "title": "Buona azione completata da {{name}}! ⭐",
+            "message": "{{name}} ha completato: {{deed}}"
+        }
     }
 }

@@ -207,5 +207,24 @@
         "failed": "Failed",
         "relatedToLetter": "Related to Letter #{{id}}",
         "relatedToDeed": "Related to Deed #{{id}}"
+    },
+    "notification": {
+        "newLetter": {
+            "title": "New letter from {{name}}!",
+            "message": "{{name}} sent a new letter to Santa. Check it out in the dashboard!"
+        },
+        "budgetAlert": {
+            "title": "Budget Alert",
+            "titleWithChild": "Budget Alert for {{name}}",
+            "message": "The estimated wishlist cost ({{totalCost}}) exceeds your budget alert threshold ({{threshold}})."
+        },
+        "moderationFlag": {
+            "title": "{{emoji}} Content flag in {{name}}'s letter",
+            "message": "A letter from {{name}} has been flagged for review ({{flagType}}). Please check the moderation dashboard."
+        },
+        "deedCompleted": {
+            "title": "Good deed completed by {{name}}! ⭐",
+            "message": "{{name}} completed: {{deed}}"
+        }
     }
 }

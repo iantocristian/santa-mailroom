@@ -207,5 +207,24 @@
         "failed": "Eșuat",
         "relatedToLetter": "Legat de scrisoarea #{{id}}",
         "relatedToDeed": "Legat de fapta #{{id}}"
+    },
+    "notification": {
+        "newLetter": {
+            "title": "Scrisoare nouă de la {{name}}!",
+            "message": "{{name}} a trimis o scrisoare nouă lui Moș Crăciun. Vezi-o în panou!"
+        },
+        "budgetAlert": {
+            "title": "Alertă de buget",
+            "titleWithChild": "Alertă de buget pentru {{name}}",
+            "message": "Costul estimat al listei de dorințe ({{totalCost}}) depășește pragul de alertă ({{threshold}})."
+        },
+        "moderationFlag": {
+            "title": "{{emoji}} Conținut semnalat în scrisoarea lui {{name}}",
+            "message": "O scrisoare de la {{name}} a fost semnalată pentru revizuire ({{flagType}}). Verifică panoul de moderare."
+        },
+        "deedCompleted": {
+            "title": "Faptă bună completată de {{name}}! ⭐",
+            "message": "{{name}} a completat: {{deed}}"
+        }
     }
 }

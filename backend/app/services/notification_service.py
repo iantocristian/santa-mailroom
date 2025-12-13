@@ -1,6 +1,7 @@
 """
 Notification service for creating and sending parent alerts.
 """
+import json
 import logging
 from typing import Optional
 from sqlalchemy.orm import Session
@@ -20,19 +21,23 @@ class NotificationService:
         self,
         family_id: int,
         notification_type: str,
-        title: str,
-        message: Optional[str] = None,
+        title_key: str,
+        title_params: Optional[dict] = None,
+        message_key: Optional[str] = None,
+        message_params: Optional[dict] = None,
         related_letter_id: Optional[int] = None,
         related_child_id: Optional[int] = None
     ) -> Notification:
         """
-        Create a new notification for a family.
+        Create a new notification for a family using i18n translation keys.
         
         Args:
             family_id: The family to notify
             notification_type: Type of notification (new_letter, budget_alert, moderation_flag, deed_completed)
-            title: Short title for the notification
-            message: Optional longer message
+            title_key: i18n translation key for the title
+            title_params: Optional parameters to interpolate into the title
+            message_key: Optional i18n translation key for the message
+            message_params: Optional parameters to interpolate into the message
             related_letter_id: Optional ID of related letter
             related_child_id: Optional ID of related child
             
@@ -42,8 +47,10 @@ class NotificationService:
         notification = Notification(
             family_id=family_id,
             type=notification_type,
-            title=title,
-            message=message,
+            title_key=title_key,
+            title_params=json.dumps(title_params) if title_params else None,
+            message_key=message_key,
+            message_params=json.dumps(message_params) if message_params else None,
             related_letter_id=related_letter_id,
             related_child_id=related_child_id
         )
@@ -60,8 +67,10 @@ class NotificationService:
         return self.create_notification(
             family_id=child.family_id,
             notification_type="new_letter",
-            title=f"New letter from {child.name}!",
-            message=f"{child.name} sent a new letter to Santa. Check it out in the dashboard!",
+            title_key="notification.newLetter.title",
+            title_params={"name": child.name},
+            message_key="notification.newLetter.message",
+            message_params={"name": child.name},
             related_letter_id=letter.id,
             related_child_id=child.id
         )
@@ -74,12 +83,20 @@ class NotificationService:
         child: Optional[Child] = None
     ) -> Notification:
         """Notify parent when budget threshold is exceeded."""
-        child_context = f" for {child.name}" if child else ""
+        params = {
+            "totalCost": f"${total_cost:.2f}",
+            "threshold": f"${threshold:.2f}"
+        }
+        if child:
+            params["name"] = child.name
+            
         return self.create_notification(
             family_id=family.id,
             notification_type="budget_alert",
-            title=f"Budget Alert{child_context}",
-            message=f"The estimated wishlist cost (${total_cost:.2f}) exceeds your budget alert threshold (${threshold:.2f}).",
+            title_key="notification.budgetAlert.titleWithChild" if child else "notification.budgetAlert.title",
+            title_params=params if child else None,
+            message_key="notification.budgetAlert.message",
+            message_params=params,
             related_child_id=child.id if child else None
         )
     
@@ -95,8 +112,10 @@ class NotificationService:
         return self.create_notification(
             family_id=child.family_id,
             notification_type="moderation_flag",
-            title=f"{severity_emoji} Content flag in {child.name}'s letter",
-            message=f"A letter from {child.name} has been flagged for review ({flag_type}). Please check the moderation dashboard.",
+            title_key="notification.moderationFlag.title",
+            title_params={"emoji": severity_emoji, "name": child.name},
+            message_key="notification.moderationFlag.message",
+            message_params={"name": child.name, "flagType": flag_type},
             related_letter_id=letter.id,
             related_child_id=child.id
         )
@@ -106,8 +125,10 @@ class NotificationService:
         return self.create_notification(
             family_id=child.family_id,
             notification_type="deed_completed",
-            title=f"Good deed completed by {child.name}! ⭐",
-            message=f"{child.name} completed: {deed_description}",
+            title_key="notification.deedCompleted.title",
+            title_params={"name": child.name},
+            message_key="notification.deedCompleted.message",
+            message_params={"name": child.name, "deed": deed_description},
             related_child_id=child.id
         )
 

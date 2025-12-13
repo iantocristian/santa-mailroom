@@ -5,6 +5,19 @@ import { useFamilyStore } from '../store/familyStore';
 import { useChildrenStore } from '../store/childrenStore';
 import { useNotificationsStore } from '../store/notificationsStore';
 
+interface Notification {
+    id: number;
+    type: string;
+    title?: string | null;
+    message?: string | null;
+    title_key?: string | null;
+    title_params?: string | null;
+    message_key?: string | null;
+    message_params?: string | null;
+    read: boolean;
+    created_at: string;
+}
+
 export default function Dashboard() {
     const { t } = useTranslation();
     const { family, stats, fetchFamily, fetchStats } = useFamilyStore();
@@ -18,6 +31,37 @@ export default function Dashboard() {
         fetchChildren();
         fetchNotifications();
     }, [fetchFamily, fetchStats, fetchChildren, fetchNotifications]);
+
+    // Helper to translate notification text from backend i18n keys
+    const translateNotification = (notification: Notification) => {
+        let title = notification.title || '';
+        let message = notification.message || '';
+
+        // If we have i18n keys, translate them
+        if (notification.title_key) {
+            try {
+                const params = notification.title_params
+                    ? JSON.parse(notification.title_params)
+                    : {};
+                title = t(notification.title_key, params) as string;
+            } catch {
+                // Fallback to legacy title if JSON parsing fails
+            }
+        }
+
+        if (notification.message_key) {
+            try {
+                const params = notification.message_params
+                    ? JSON.parse(notification.message_params)
+                    : {};
+                message = t(notification.message_key, params) as string;
+            } catch {
+                // Fallback to legacy message if JSON parsing fails
+            }
+        }
+
+        return { title, message };
+    };
 
     const copyToClipboard = async (text: string) => {
         try {
@@ -228,34 +272,37 @@ export default function Dashboard() {
                             </div>
                         ) : (
                             <div style={{ maxHeight: 400, overflow: 'auto' }}>
-                                {notifications.slice(0, 10).map((notification) => (
-                                    <div
-                                        key={notification.id}
-                                        style={{
-                                            padding: '14px 20px',
-                                            borderBottom: '1px solid var(--border-secondary)',
-                                            background: notification.read ? 'transparent' : 'rgba(212, 175, 55, 0.05)',
-                                        }}
-                                    >
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                                            <span>
-                                                {notification.type === 'new_letter' && '✉️'}
-                                                {notification.type === 'moderation_flag' && '⚠️'}
-                                                {notification.type === 'budget_alert' && '💰'}
-                                                {notification.type === 'deed_completed' && '⭐'}
-                                            </span>
-                                            <strong style={{ fontSize: '0.9rem' }}>{notification.title}</strong>
+                                {notifications.slice(0, 10).map((notification) => {
+                                    const translated = translateNotification(notification as Notification);
+                                    return (
+                                        <div
+                                            key={notification.id}
+                                            style={{
+                                                padding: '14px 20px',
+                                                borderBottom: '1px solid var(--border-secondary)',
+                                                background: notification.read ? 'transparent' : 'rgba(212, 175, 55, 0.05)',
+                                            }}
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                                                <span>
+                                                    {notification.type === 'new_letter' && '✉️'}
+                                                    {notification.type === 'moderation_flag' && '⚠️'}
+                                                    {notification.type === 'budget_alert' && '💰'}
+                                                    {notification.type === 'deed_completed' && '⭐'}
+                                                </span>
+                                                <strong style={{ fontSize: '0.9rem' }}>{translated.title}</strong>
+                                            </div>
+                                            {translated.message && (
+                                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
+                                                    {translated.message}
+                                                </p>
+                                            )}
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 6 }}>
+                                                {new Date(notification.created_at).toLocaleDateString()}
+                                            </div>
                                         </div>
-                                        {notification.message && (
-                                            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
-                                                {notification.message}
-                                            </p>
-                                        )}
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 6 }}>
-                                            {new Date(notification.created_at).toLocaleDateString()}
-                                        </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </div>

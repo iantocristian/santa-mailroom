@@ -8,6 +8,7 @@ from alembic import context
 from app.database import Base
 from app.config import get_settings
 from app import models  # noqa: F401 - import to register models
+from app import job_queue  # noqa: F401 - import to register Job model
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
